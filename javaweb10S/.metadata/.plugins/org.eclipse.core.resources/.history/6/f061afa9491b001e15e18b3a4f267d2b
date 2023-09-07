@@ -1,0 +1,11 @@
+package com.spring.javaweb10S.dao;
+
+import java.util.ArrayList;
+
+import com.spring.javaweb10S.vo.ProductVO;
+
+public interface ShopDAO {
+
+	ArrayList<ProductVO> getItemPart();
+
+}

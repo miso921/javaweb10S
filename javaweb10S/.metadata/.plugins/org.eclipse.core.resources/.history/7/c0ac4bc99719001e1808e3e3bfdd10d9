@@ -1,0 +1,141 @@
+package com.spring.javaweb10S;
+
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.spring.javaweb10S.pagination.PageProcess;
+import com.spring.javaweb10S.pagination.PageVO;
+import com.spring.javaweb10S.service.AdminService;
+import com.spring.javaweb10S.vo.MemberVO;
+
+@Controller
+@RequestMapping("/admin")
+public class AdminController {	
+	
+	@Autowired
+	AdminService adminService;
+	
+	@Autowired
+	BCryptPasswordEncoder passwordEncoder;
+	
+	@Autowired
+	PageProcess pageProcess;
+	
+	@Autowired
+	JavaMailSender mailSender;
+	
+	// 관리자 페이지 이동 (adminLeft, adminContent 프레임)
+	@RequestMapping(value = "/adminMain", method = RequestMethod.GET)
+	public String adminMainGet() {
+		return "/admin/adminMain";
+	}
+	
+	// 관리자 페이지 메뉴
+	@RequestMapping(value = "/adminLeft", method = RequestMethod.GET)
+	public String adminLeftGet() {
+		return "/admin/adminLeft";
+	}
+	
+	// 관리자 페이지 화면 이동
+	@RequestMapping(value = "/adminContent", method = RequestMethod.GET)
+	public String adminContentGet(String search) {
+		return "/admin/adminContent";
+	}
+	
+	// 회원목록 이동
+	@RequestMapping(value = "/member/adminMemberList", method = RequestMethod.GET)
+	public String adminMemberListGet(
+			@RequestParam(name="pag", defaultValue="1", required=false) int pag,
+			@RequestParam(name="pageSize", defaultValue="5", required=false) int pageSize,
+			Model model, HttpServletRequest request) {
+		PageVO pageVO = pageProcess.totRecCnt(pag, pageSize, "admin", "", "");
+		
+		List<MemberVO> vos = adminService.getAdminMemberList(pageVO.getStartIndexNo(), pageSize);
+		
+		model.addAttribute("vos",vos);
+		model.addAttribute("pageVO",pageVO);
+		
+		return "/admin/member/adminMemberList";
+	}
+	
+	// 회원탈퇴 처리
+	@ResponseBody
+	@RequestMapping(value="/member/adminMemberDelete", method= RequestMethod.POST)
+	public String adminMemberDeletePost(int idx) {
+		adminService.setMemberDelete(idx);
+		return "";
+	}
+	
+	// 선택항목 회원등급 변경처리
+	@ResponseBody
+	@RequestMapping(value="/member/adminMemberLevelTotalChange", method=RequestMethod.POST)
+	public String adminMemberLevelTotalChangePost(
+			@RequestParam(name="level", defaultValue="0", required=false) int level,
+			@RequestParam(name="changeItems", defaultValue="", required=false) String changeItems
+			) {
+		String[] changeItem = changeItems.split("/");
+		
+		for(String idx : changeItem) {
+			adminService.setMemberLevelChange(level, (Integer.parseInt(idx)));
+		}
+		return "";
+	}
+	
+	// 개별항목 회원등급 변경처리
+	@ResponseBody
+	@RequestMapping(value="/member/adminMemeberLevelChange", method=RequestMethod.POST)
+	public String adminMemeberLevelChangePost(
+			@RequestParam(name="level", defaultValue="0", required=false) int level,
+			@RequestParam(name="idx", defaultValue="0", required=false) int idx) {
+		adminService.setMemberLevelChange(level,idx);
+		return "";
+	}
+	
+	// 회원 검색 처리
+	@RequestMapping(value="/member/adminMemberSearch", method = RequestMethod.GET)
+	public String adminMemberSearchGet(String search, String searchString,
+			@RequestParam(name="pag", defaultValue="1", required=false) int pag,
+			@RequestParam(name="pageSize", defaultValue="5", required=false) int pageSize,
+			Model model) {
+		PageVO pageVO = pageProcess.totRecCnt(pag, pageSize, "admin", search, searchString);
+		List<MemberVO> vos;
+		String searchTitle = "";
+		
+
+			if(pageVO.getSearch().equals("name")) searchTitle = "성명";
+			else if(pageVO.getSearch().equals("mid")) searchTitle = "아이디";
+			else if(pageVO.getSearch().equals("email")) searchTitle = "이메일";
+			else if(pageVO.getSearch().equals("address")) searchTitle = "주소";
+			else if(pageVO.getSearch().equals("tel")) searchTitle = "전화번호";
+			else if(pageVO.getSearch().equals("birthday")) searchTitle = "생년월일";
+			else if(pageVO.getSearch().equals("gender")) searchTitle = "성별";
+			else if(pageVO.getSearch().equals("userDel")) searchTitle = "탈퇴유무";
+			else searchTitle = "회원등급";
+			
+			vos = adminService.getAdminMemberListSearch(pageVO.getStartIndexNo(), pageSize, searchTitle, searchString);
+		}
+		System.out.println("vos"+vos);
+		System.out.println("search"+search);
+		System.out.println("searchString"+searchString);
+		System.out.println("searcht"+searchTitle);
+				
+		model.addAttribute("vos",vos);
+		model.addAttribute("pageVO",pageVO);
+		model.addAttribute("searchTitle",searchTitle);
+		
+		return "admin/member/adminMemberSearch";
+	}
+	
+	
+}	

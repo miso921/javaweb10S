@@ -1,0 +1,83 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<% pageContext.setAttribute("newLine", "\n"); %>
+<c:set var="ctp" value="${pageContext.request.contextPath}"/>
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>recipeContent.jsp(레시피정보 상세보기)</title>
+  <jsp:include page="/WEB-INF/views/include/bs4.jsp"/>
+  <link rel="stylesheet" href="${ctp}/font/font.css"/>
+  <style>
+		.container, h4, h3 {font-family:'SUITE-Regular';}
+		#heart:hover {cursor:pointer;}
+	</style>
+	<script>
+		// 레시피 삭제
+		function recipeDeleteCheck() {
+			let ans = confirm("선택한 레시피를 삭제하시겠습니까?");
+			if(ans) location.href="${ctp}/admin/recipe/recipeDelete?idx="+idx;
+		}
+
+		let isFilled = false; // 하트가 채워져 있는지 여부를 저장하는 변수
+
+		function toggleHeart() {
+		  let heartElement = document.getElementById("heart");
+		  
+		  if (isFilled) {
+		    heartElement.innerHTML = "<i class="xi-heart-o xi-2x mr-4" id="heart>"; // 채워진 하트로 변경
+		    isFilled = false;
+		  } else {
+		    heartElement.innerHTML = "♡"; // 비워진 하트로 변경
+		    isFilled = true;
+		  }
+		}
+	</script>
+</head>
+</head>
+<body>
+<p><br/></p>
+<div class="container">
+  <div class="row">
+    <div class="col p-3 text-center" style="border:1px solid #ccc">
+			  <!-- 레시피 메인 이미지 -->
+			  <div>
+			  	<c:set var="recipeImg" value="${fn:split(recipeVO.file,'/')}"/>
+			    <img src="${ctp}/recipe/${recipeImg[0]}" width="100%"/>
+			  </div>
+			</div>
+			<div class="col p-3 text-right">
+			  <!-- 레시피 기본정보 -->
+			  <div id="iteminfor">
+			    <h3>요리명&nbsp;|&nbsp;<font color="brown">${recipeVO.foodName}</font></h3>
+			    <h3>난이도&nbsp;|&nbsp;<font color="brown">${recipeVO.star}</font></h3>
+			    <h3>조리시간&nbsp;|&nbsp;<font color="brown">${recipeVO.cookTime}</font></h3>
+	      	<!-- <span class="love">
+		        ♥
+		        <span>♥</span>
+		        <input type="range" name="love" onclick="toggleHeart()" value="1" />
+		       </span> -->
+		       <span class="love">
+						 <span onclick="toggleHeart()"><i class="xi-heart-o xi-2x mr-4" id="heart"></span>
+					 </span>
+			  </div>
+			  <br/>
+			  <div class="text-right p-2">
+			    <input type="button" value="레시피수정" onclick="location.href='${ctp}/admin/recipe/recipeUpdate?idx=${recipeVO.idx}';" class="btn btn-success"/>
+			    <input type="button" value="레시피삭제" onclick="recipeDeleteCheck()" class="btn btn-danger"/>
+			    <input type="button" value="돌아가기" onclick="location.href='${ctp}/admin/product/productList';" class="btn btn-warning"/>
+			  </div>
+			</div>
+	  </div>
+	  <br/><br/>
+	  <!-- 상품 상세설명 보여주기 -->
+	  <div id="content" class="text-center"><br/>
+	  	<img src="${ctp}/recipe/${recipeImg[1]}">	
+	  </div>
+</div>
+<p><br/></p>
+</body>
+</html>

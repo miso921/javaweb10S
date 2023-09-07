@@ -1,0 +1,17 @@
+package com.spring.javaweb10S.vo;
+
+import lombok.Data;
+
+@Data
+public class itemOrderVO {
+	private int idx;
+	private String orderIdx;
+	private String mid;
+	private String orderIdx;
+	private String orderIdx;
+	private String orderIdx;
+	private String orderIdx;
+	private String orderIdx;
+	private String orderIdx;
+	private String orderIdx;
+} 

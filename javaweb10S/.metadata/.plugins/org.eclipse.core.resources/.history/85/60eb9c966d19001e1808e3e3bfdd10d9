@@ -1,0 +1,6 @@
+show tables;
+
+create table qna2(
+	idx   int not null auto_increment,    /* 문의 고유번호 */
+	part  varchar(10) default '상품',         /* 문의 분류(상품, 레시피) */
+);

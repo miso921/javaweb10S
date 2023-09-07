@@ -1,0 +1,61 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<c:set var="ctp" value="${pageContext.request.contextPath}"/>
+<style>
+	@font-face {
+	  font-family: 'EF_watermelonSalad';
+	  src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2210-EF@1.0/EF_watermelonSalad.woff2') format('woff2');
+	  font-weight: normal;
+	  font-style: normal;
+	}
+	.navbar {font-family: 'EF_watermelonSalad';}
+	.nav-link, #navbardrop,  {font-size:4em;}
+	.dropdown-item {font-size:1.3em;}
+	.nav-link:hover {
+		cursor:pointer;
+	}
+	
+	.navbar {
+		/* display: flex; */
+		/* jusify-content: space-between; */ 
+		jusify-content: center; 
+		/* align-items: center; */
+		/* width: 100%;
+		height: 100%;
+		padding-left: 20px;
+		padding-right: 20px; */
+	}
+</style>
+<!-- Navbar -->
+<nav class="navbar navbar-expand-sm bg-dark navbar-dark" style="height:80px;">
+  <ul class="navbar-nav">
+	  <!-- Dropdown -->
+	  <!-- <li class="nav-item dropdown">
+	    <a class="nav-link" id="navbardrop" data-toggle="dropdown">
+	      레시피
+	    </a>
+	    <div class="dropdown-menu">
+	      <a class="dropdown-item" href="#">전체</a>
+	      <a class="dropdown-item" href="#"></a>
+	      <a class="dropdown-item" href="#">테마</a>
+	    </div>
+	  </li> -->
+  	<!-- Links -->
+    <li class="nav-item">
+      <a class="nav-link" href="${ctp}/recipe/recipeList">레시피</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="${ctp}/cookStory/cookStoryList">요리이야기</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="#">오늘의레시피</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="${ctp}/shop/itemList">가게</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="#">문의</a>
+    </li>
+  </ul>
+</nav>
+<br>

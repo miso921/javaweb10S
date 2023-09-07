@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Mapper 가져오기 -->
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.spring.javaweb10S.dao.RecipeDAO">
+	
+	<select id="getRecipePart" resultType="com.spring.javaweb10S.vo.RecipeVO">
+		SELECT part FROM recipe2 WHERE openSw = 'OK' GROUP BY part ORDER BY part;
+	</select>
+	
+	<select id="getPartRecipeList" resultType="com.spring.javaweb10S.vo.RecipeVO">
+		<if test='part == "전체"'>
+			SELECT * FROM recipe2 WHERE openSw = 'OK' ORDER BY idx desc;
+		</if>
+		<if test='part != "전체"'>
+			SELECT * FROM recipe2 WHERE part = #{part} and openSw = 'OK' ORDER BY idx desc;
+		</if>
+	</select>
+	
+	<select id="getRecipeContent" resultType="com.spring.javaweb10S.vo.RecipeVO">
+		SELECT * FROM recipe2 WHERE idx = ${idx} AND openSw = 'OK';
+	</select>
+	
+	<select id="getRecipeFile" resultType="com.spring.javaweb10S.vo.RecipeVO">
+	  SELECT * FROM recipe2 WHERE file LIKE CONCAT('%',#{file},'%') LIMIT 1;
+		<!-- SELECT * FROM recipe2 WHERE foodName = #{foodName}; -->
+	</select>
+	
+	<select id="dibsRecipeCheck" resultType="boolean">
+	  SELECT EXISTS(SELECT 1 FROM dibs2 WHERE recipeIdx = #{idx} AND dibsMid = #{mid});
+	</select>
+	
+	<select id="getRecipeList" resultType="com.spring.javaweb10S.vo.RecipeVO">
+	  SELECT * FROM recipe2 ORDER BY idx DESC;
+	</select>
+	
+	<select id="getDibsRecipeList" resultType="com.spring.javaweb10S.vo.DibsRecipeVO">
+	  SELECT d.*, r.foodName as foodName, r.file as file FROM dibs2 d, recipe2 r where d.recipeIdx = r.idx ORDER BY idx DESC;
+	</select>
+	
+	<select id="totRecCnt" resultType="int">
+	  SELECT count(*) FROM dibs2;
+	</select>
+	
+	<select id="getDibsRecipeSearch" resultType="com.spring.javaweb10S.vo.DibsRecipeVO">
+	  SELECT * FROM dibs2 WHERE recipeIdx= #{idx} AND dibsMid = #{mid};
+	</select>
+	
+	
+	
+	
+	
+	<insert id="insertDibsRecipe">
+		INSERT INTO dibs2 VALUES (DEFAULT,#{idx},#{mid});
+	</insert>
+	
+	
+	
+	
+	
+	
+	<delete id="deleteDibsRecipe">
+		DELETE FROM dibs2 WHERE recipeIdx = #{idx} AND dibsMid = #{mid};
+	</delete>
+	
+	<delete id="setDibsRecipeDelete">
+		DELETE FROM dibs2 WHERE recipeIdx = #{idx};
+	</delete>
+	
+	
+</mapper>

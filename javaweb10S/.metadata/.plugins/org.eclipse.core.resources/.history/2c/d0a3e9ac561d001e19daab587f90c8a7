@@ -1,0 +1,415 @@
+package com.spring.javaweb10S;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.Errors;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
+
+import com.spring.javaweb10S.pagination.PageProcess;
+import com.spring.javaweb10S.pagination.PageVO;
+import com.spring.javaweb10S.service.AdminService;
+import com.spring.javaweb10S.vo.MemberVO;
+import com.spring.javaweb10S.vo.OptionVO;
+import com.spring.javaweb10S.vo.ProductVO;
+import com.spring.javaweb10S.vo.RecipeVO;
+
+@Controller
+@RequestMapping("/admin")
+public class AdminController {
+
+	@Autowired
+	AdminService adminService;
+
+	@Autowired
+	BCryptPasswordEncoder passwordEncoder;
+
+	@Autowired
+	PageProcess pageProcess;
+
+	@Autowired
+	JavaMailSender mailSender;
+
+	// 관리자 페이지 이동 (adminLeft, adminContent 프레임)
+	@RequestMapping(value = "/adminMain", method = RequestMethod.GET)
+	public String adminMainGet() {
+		return "/admin/adminMain";
+	}
+
+	// 관리자 페이지 메뉴
+	@RequestMapping(value = "/adminLeft", method = RequestMethod.GET)
+	public String adminLeftGet() {
+		return "/admin/adminLeft";
+	}
+
+	// 관리자 페이지 화면 이동
+	@RequestMapping(value = "/adminContent", method = RequestMethod.GET)
+	public String adminContentGet(String search) {
+		return "/admin/adminContent";
+	}
+
+	// 회원목록 이동
+	@RequestMapping(value = "/member/adminMemberList", method = RequestMethod.GET)
+	public String adminMemberListGet(@RequestParam(name = "pag", defaultValue = "1", required = false) int pag,
+			@RequestParam(name = "pageSize", defaultValue = "5", required = false) int pageSize, Model model,
+			HttpServletRequest request) {
+		PageVO pageVO = pageProcess.totRecCnt(pag, pageSize, "admin", "", "");
+
+		List<MemberVO> vos = adminService.getAdminMemberList(pageVO.getStartIndexNo(), pageSize);
+
+		model.addAttribute("vos", vos);
+		model.addAttribute("pageVO", pageVO);
+
+		return "/admin/member/adminMemberList";
+	}
+
+	// 회원탈퇴 처리
+	@ResponseBody
+	@RequestMapping(value = "/member/adminMemberDelete", method = RequestMethod.POST)
+	public String adminMemberDeletePost(int idx) {
+		adminService.setMemberDelete(idx);
+		return "";
+	}
+
+	// 선택항목 회원등급 변경처리
+	@ResponseBody
+	@RequestMapping(value = "/member/adminMemberLevelTotalChange", method = RequestMethod.POST)
+	public String adminMemberLevelTotalChangePost(
+			@RequestParam(name = "level", defaultValue = "0", required = false) int level,
+			@RequestParam(name = "changeItems", defaultValue = "", required = false) String changeItems) {
+		String[] changeItem = changeItems.split("/");
+
+		for (String idx : changeItem) {
+			adminService.setMemberLevelChange(level, (Integer.parseInt(idx)));
+		}
+		return "";
+	}
+
+	// 개별항목 회원등급 변경처리
+	@ResponseBody
+	@RequestMapping(value = "/member/adminMemeberLevelChange", method = RequestMethod.POST)
+	public String adminMemeberLevelChangePost(
+			@RequestParam(name = "level", defaultValue = "0", required = false) int level,
+			@RequestParam(name = "idx", defaultValue = "0", required = false) int idx) {
+		adminService.setMemberLevelChange(level, idx);
+		return "";
+	}
+
+	// 회원 검색 처리
+	@RequestMapping(value = "/member/adminMemberSearch", method = RequestMethod.GET)
+	public String adminMemberSearchGet(String search, String searchString,
+			@RequestParam(name = "pag", defaultValue = "1", required = false) int pag,
+			@RequestParam(name = "pageSize", defaultValue = "5", required = false) int pageSize, Model model) {
+		PageVO pageVO = pageProcess.totRecCnt(pag, pageSize, "admin", search, searchString);
+		System.out.println("pageVO" + pageVO.getTotRecCnt());
+		List<MemberVO> vos = adminService.getAdminMemberListSearch(pageVO.getStartIndexNo(), pageSize, search,
+				searchString);
+
+		String searchTitle = "";
+		if (pageVO.getSearch().equals("name"))
+			searchTitle = "성명";
+		else if (pageVO.getSearch().equals("mid"))
+			searchTitle = "아이디";
+		else if (pageVO.getSearch().equals("email"))
+			searchTitle = "이메일";
+		else if (pageVO.getSearch().equals("address"))
+			searchTitle = "주소";
+		else if (pageVO.getSearch().equals("tel"))
+			searchTitle = "전화번호";
+		else if (pageVO.getSearch().equals("birthday"))
+			searchTitle = "생년월일";
+		else if (pageVO.getSearch().equals("gender"))
+			searchTitle = "성별";
+		else if (pageVO.getSearch().equals("userDel"))
+			searchTitle = "탈퇴유무";
+		else
+			searchTitle = "회원등급";
+
+		model.addAttribute("vos", vos);
+		model.addAttribute("pageVO", pageVO);
+		model.addAttribute("searchTitle", searchTitle);
+
+		return "admin/member/adminMemberSearch";
+	}
+
+	// 상품 등록 창 이동
+	@RequestMapping(value = "/product/productInput", method = RequestMethod.GET)
+	public String productInputGet() {
+		return "admin/product/productInput";
+	}
+
+	// 상품 등록 처리
+	@RequestMapping(value = "/product/productInput", method = RequestMethod.POST)
+	public String productInputPost(ProductVO vo, MultipartFile fName1, MultipartFile fName2) {
+		int res = adminService.setProductInput(vo, fName1, fName2);
+		if (res == 1)
+			return "redirect:/message/productInputOk";
+		else
+			return "redirect:/message/productInputNo";
+	}
+
+	// 상품 목록 모두 보여주기
+	@RequestMapping(value = "/product/productList", method = RequestMethod.GET)
+	public String productListGet(Model model,
+			@RequestParam(name = "part", defaultValue = "전체", required = false) String part) {
+		// 상품 분류 보내기
+		String[] parts = { "신선식품", "가공식품", "주방용품" };
+		model.addAttribute("parts", parts);
+
+		// 전체 상품 목록 가져오기
+		List<ProductVO> productVOS = adminService.getProductList(part);
+		model.addAttribute("productVOS", productVOS);
+
+		return "admin/product/productList";
+	}
+
+	// 상품 상세정보 보여주기
+	@RequestMapping(value = "/product/productContent", method = RequestMethod.GET)
+	public String productContentGet(int idx, Model model) {
+		ProductVO productVO = adminService.getProduct(idx); // 상품의 상세정보 불러오기
+		ArrayList<OptionVO> optionVOS = adminService.getOption(idx); // 옵션의 모든 정보 불러오기
+
+		model.addAttribute("productVO", productVO);
+		model.addAttribute("optionVOS", optionVOS);
+
+		return "admin/product/productContent";
+	}
+
+	// 상품 옵션 등록창 이동하기
+	@RequestMapping(value = "/product/productOptionInput", method = RequestMethod.GET)
+	public String productOptionInputGet(Model model) {
+		ArrayList<ProductVO> partVOS = adminService.getPart();
+		model.addAttribute("partVOS", partVOS);
+		return "admin/product/productOptionInput";
+	}
+
+	// 상품 분류 골랐을 때 상품명 가져오기
+	@ResponseBody
+	@RequestMapping(value = "/product/productName", method = RequestMethod.POST)
+	public List<ProductVO> productNamePost(String part, String productName) {
+		return adminService.getProductName(part, productName);
+	}
+
+	// 옵션 박스에서 상품을 선택하면 선택된 상품의 상세설명 가져가기
+	@ResponseBody
+	@RequestMapping(value = "/product/getProductInfor", method = RequestMethod.POST)
+	public ProductVO getProductInforPost(String productName) {
+		return adminService.getProductInfor(productName);
+	}
+
+	// 상품 삭제 처리
+	@ResponseBody
+	@RequestMapping(value = "/product/productDelete", method = RequestMethod.GET)
+	public String productDeletePost(int idx, int productIdx) {
+		adminService.setProductDelete(idx, productIdx);
+		return "";
+	}
+	
+	// 상품의 '옵션보기' 버튼을 누르면 해당 제품의 모든 옵션 보여주기
+	@ResponseBody
+	@RequestMapping(value = "/product/getOptionList", method = RequestMethod.POST)
+	public List<OptionVO> getOptionListPost(int productIdx) {
+		return adminService.getOptionList(productIdx);
+	}
+
+	// 옵션 등록창에서 옵션 목록 확인 후 필요없는 옵션 항목 삭제처리
+	@RequestMapping(value = "/product/optionDelete", method = RequestMethod.POST)
+	public String optionDeletePost(int idx) {
+		adminService.setOptionDelete(idx);
+		return "";
+	}
+
+	// 옵션 등록하기
+	@RequestMapping(value = "/product/productOptionInput", method = RequestMethod.POST)
+	public String productOptionInputPost(OptionVO vo, String[] optionName, int[] optionPrice) {
+		int res = 0;
+
+		for (int i = 0; i < optionName.length; i++) {
+
+			// 상품의 옵션 개수 가져오기(중복된 옵션값 확인하기)
+			int optionCnt = adminService.getOptionSame(vo.getProductIdx(), optionName[i]);
+			if (optionCnt != 0)
+				continue;
+
+			// 동일한 옵션이 없으면 vo에 저장 후 옵션 테이블에 등록
+			vo.setProductIdx(vo.getProductIdx());
+			vo.setOptionName(optionName[i]);
+			vo.setOptionPrice(optionPrice[i]);
+
+			adminService.setOptionInput(vo);
+			res = 1;
+		}
+		if (res == 1)
+			return "redirect:/message/productOptionInputOk";
+		else
+			return "redirect:/message/productOptionInputNo";
+	}
+
+	
+	
+	// 레시피 등록창으로 이동
+	@RequestMapping(value = "/recipe/recipeInput", method = RequestMethod.GET)
+	public String recipeInputGet() {
+		return "admin/recipe/recipeInput";
+	}
+	
+	// 레시피 등록 처리
+	@RequestMapping(value = "/recipe/recipeInput", method = RequestMethod.POST)
+	public String recipeInputPost(RecipeVO vo, MultipartHttpServletRequest file) {
+		adminService.setRecipeSave(vo, file);
+		int res = 1;
+		
+		if(res == 1) return "redirect:/message/recipeInputOk ";
+		else return "redirect:/message/recipeInputNo";
+	}
+
+	// 레시피 목록으로 이동
+	@RequestMapping(value = "/recipe/recipeList", method = RequestMethod.GET)
+	public String recipeListGet(Model model,
+			@RequestParam(name = "part", defaultValue = "전체", required = false) String part) {
+		// 레시피 분류 보내기
+		String[] parts = { "메인요리", "반찬", "모임요리", "간식", "외국요리"};
+		model.addAttribute("parts", parts);
+
+		// 레시피 전체 목록 가져오기
+		ArrayList<RecipeVO> recipeVOS = adminService.getRecipeList(part);
+		model.addAttribute("recipeVOS",recipeVOS);
+		
+		return "admin/recipe/recipeList";
+	}
+		
+	// 레시피 상세보기 처리
+	@RequestMapping(value = "/recipe/recipeContent", method = RequestMethod.GET)
+	public String recipeContentGet(Model model, int idx) {
+		RecipeVO recipeVO = adminService.getRecipeContent(idx); 
+		model.addAttribute("recipeVO", recipeVO);
+
+		return "admin/recipe/recipeContent";
+	}
+	
+	
+  // 레시피 삭제 처리
+	@ResponseBody
+  @RequestMapping(value = "/recipe/recipeDelete", method = RequestMethod.POST)
+  public String recipeDeletePost(int idx) {
+  	adminService.setRecipeDelete(idx);
+  	return "";
+  }
+	 
+	// 오늘의 레시피 등록 창으로 이동
+	public String todayRecipeInputGet() {
+		
+	}
+	
+	// 오늘의레시피 목록으로 이동
+	@RequestMapping(value = "/todayRecipe/todayRecipeList", method = RequestMethod.GET)
+	public String todayRecipeListGet() {
+//		crawling();
+		
+		return "admin/todayRecipe/todayRecipeList";
+	}
+	
+//	// 오늘의레시피 크롤링으로 가져온 후 저장하기
+//	public void crawling() {
+//		
+//		WebElement webElement;
+//		String title, article, issueDate;
+//		
+//		final File driverFile = new File("C:\\javaweb\\springframework\\javaweb10S\\javaweb10S\\src\\main\\resources\\chromedriver.exe");
+//		final String driverFilePath = driverFile.getAbsolutePath();
+//		if(!driverFile.exists() && driverFile.isFile()) {
+//			throw new RuntimeException("not found file. or this is not file" + driverFilePath);
+//		}
+//		
+//		final ChromeDriverService service;
+//		service = new ChromeDriverService.Builder().usingDriverExecutable(driverFile).usingAnyFreePort().build();
+////		ChromeOptions options = new ChromeOptions();
+//		// 브라우저가 눈에 보이지 않고 내부적으로 돈다.
+//		// 설정하지 않을 시 실제 크롬 창이 생성되고, 어떤 순서로 진행되는지 확인할 수 있다.
+////		options.addArguments("headless");
+//		
+//		// 위에서 설정한 옵션은 담은 드라이버 객체 생성
+//		// 옵션을 설정하지 않았을 때에는 생략 가능하다.
+//		// WebDriver객체가 곧 하나의 브라우저 창이라 생각한다.
+//		
+////		try {
+////			service.start();
+////		} catch(IOException e1) {
+////			e1.printStackTrace();
+////		}
+//		
+//		//final WebDriver driver = new ChromeDriver(options);
+//		final WebDriver driver =  new ChromeDriver(service);
+////		final WebDriverWait wait = new WebDriverWait(driver, 10);
+//		
+//		try {
+//			driver.get("https://www.joongang.co.kr/newsletter/cooking");
+//			Thread.sleep(3000);
+//			
+////			JavascriptExecutor js = (JavascriptExecutor) driver;
+//			
+//            for (int i = 1; i <= 100; i++) {
+//            	driver.findElement(By.xpath("/html/body/div[1]/main/section/section[1]/ul/li["+i+"]/div/h2/a")).click();
+//            	Thread.sleep(2000);
+//							/*
+//							 * webElement = driver.findElement(By.xpath("//*[@id=\"d_song_org\"]/a/img"));
+//							 * // image 요소 식별 photo = webElement.getAttribute("src"); // 이미지 URL 가져오기
+//							 */
+//            	webElement = driver.findElement(By.xpath("//*[@id=\"container\"]/section/article/header/div[2]"));
+//            	title = webElement.getText();
+//            	
+//            	String temp = "#container > section > article > div > p:nth-child(\"+j+\") > span";
+//            	for(int j=1; j<temp.length(); j++) {
+//            	webElement = driver.findElement(By.cssSelector(temp));
+//            	article = webElement.getText();
+//            	
+//            	webElement = driver.findElement(By.xpath("/html/body/div[1]/main/section/article/header/div[2]/div/input"));
+//            	issueDate = webElement.getText();
+//            	
+//            	TodayRecipeVO vo = new TodayRecipeVO();
+//            	vo.setTitle(title);
+//            	vo.setArticle(article);
+//            	vo.setIssueDate(issueDate);
+//            	
+//            	adminService.setNewsLetter(vo);
+//            	
+////            	System.out.println(
+////            			i + " / Title: " + title + " / Article: " + article + " / date: " + date
+////							 + " / photo: " + photo );
+//            	
+////            	driver.findElement(By.className("menu_bg")).click();
+//            	
+//            	driver.navigate().back();
+//            	Thread.sleep(2000);
+//            	
+//							/*
+//							 * // 다음 페이지로 이동하는 조건문 if(i % 24 == 0) { WebElement nextPageButton =
+//							 * driver.findElement(By.xpath(
+//							 * "//*[@id=\"container\"]/section/section[1]/nav/ul/li["+i+"]/a")); if
+//							 * (!nextPageButton.getAttribute("disabled").equals("true")) {
+//							 * nextPageButton.click(); Thread.sleep(2000); } else { break; } }
+//							 */
+//            }
+//			
+//	    } catch (Exception e2) {
+//	        e2.printStackTrace();
+//	    } finally {
+//	        // 프로그램이 종료되면 resource 해제
+//	        driver.quit();
+//	        service.stop();
+//	    }
+//}
+}

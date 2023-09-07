@@ -1,0 +1,5 @@
+show tables;
+
+create table qna2(
+	idx int not null auto_increment,    /* 문의 고유번호 */
+);

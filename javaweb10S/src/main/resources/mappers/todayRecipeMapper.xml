@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Mapper 가져오기 -->
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.spring.javaweb10S.dao.TodayRecipeDAO">
+
+	<select id="totRecCnt1" resultType="int">
+		SELECT count(*) FROM todayRecipe2;
+	</select>
+	
+	<select id="getTodayRecipeList" resultType="com.spring.javaweb10S.vo.TodayRecipeVO">
+ 		SELECT *, TIMESTAMPDIFF(HOUR, issueDate, NOW()) AS hour_diff FROM todayRecipe2 ORDER BY issueDate DESC LIMIT #{startIndexNo}, #{pageSize};
+	</select>
+	
+	<select id="getTodayRecipeSubApli" resultType="com.spring.javaweb10S.vo.TodayRecipeSubVO">
+		SELECT * FROM todayRecipeSub2 WHERE mail = #{sMail};
+	</select>
+	
+	<select id="totRecCnt2" resultType="int">
+		SELECT count(*) FROM todayRecipeSub2;
+	</select>
+	
+	<select id="getTodayRecipeContent" resultType="com.spring.javaweb10S.vo.TodayRecipeVO">
+		SELECT * FROM todayRecipe2 WHERE idx = #{idx};
+	</select>
+
+	
+	<update id="setTodayRecipeUpdate">
+		UPDATE todayRecipe2 SET readNum = #{readNum} + 1 WHERE idx = #{idx};
+	</update>
+	
+	
+	
+	
+	<insert id="setTodayRecipeSubApli">
+		INSERT INTO todayrecipesub2 VALUES (default, #{vo.mail}, #{vo.nickName});
+	</insert>
+</mapper>

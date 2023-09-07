@@ -1,0 +1,34 @@
+package com.spring.javaweb10S.dao;
+
+import java.util.List;
+
+import org.apache.ibatis.annotations.Param;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
+
+import com.spring.javaweb10S.vo.MemberVO;
+import com.spring.javaweb10S.vo.ProductVO;
+
+public interface AdminDAO {
+
+	public int totRecCnt();
+
+	public List<MemberVO> getAdminMemberList(@Param("startIndexNo") int startIndexNo, @Param("pageSize") int pageSize);
+
+	public void setMemberDelete(@Param("idx") int idx);
+
+	public void setMemberLevelChange(@Param("level") int level, @Param("idx") int idx);
+
+	public List<MemberVO> getAdminMemberListSearch(@Param("startIndexNo") int startIndexNo, @Param("pageSize") int pageSize, @Param("search") String search, @Param("searchString") String searchString);
+
+	public int setProductInput(@Param("vo") ProductVO vo);
+
+	public List<ProductVO> getPart();
+
+	public List<ProductVO> getProductList(@Param("part") String part);
+
+	public List<ProductVO> getProductName(@Param("part") String part, @Param("productName") String productName);
+
+	public ProductVO getProductInfor(@Param("productName") String productName);
+
+
+}

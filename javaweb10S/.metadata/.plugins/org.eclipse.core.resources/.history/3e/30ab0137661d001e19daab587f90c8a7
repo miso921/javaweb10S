@@ -1,0 +1,291 @@
+package com.spring.javaweb10S.service;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
+import java.util.UUID;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
+
+import com.spring.javaweb10S.dao.AdminDAO;
+import com.spring.javaweb10S.vo.MemberVO;
+import com.spring.javaweb10S.vo.OptionVO;
+import com.spring.javaweb10S.vo.ProductVO;
+import com.spring.javaweb10S.vo.RecipeVO;
+import com.spring.javaweb10S.vo.TodayRecipeVO;
+
+@Service
+public class AdminServiceImpl implements AdminService {
+
+	@Autowired
+	AdminDAO adminDAO;
+
+	@Override
+	public List<MemberVO> getAdminMemberList(int startIndexNo, int pageSize) {
+		return adminDAO.getAdminMemberList(startIndexNo, pageSize);
+	}
+
+	@Override
+	public void setMemberDelete(int idx) {
+		adminDAO.setMemberDelete(idx);
+	}
+
+	@Override
+	public void setMemberLevelChange(int level, int idx) {
+		adminDAO.setMemberLevelChange(level,idx);
+	}
+
+	@Override
+	public List<MemberVO> getAdminMemberListSearch(int startIndexNo, int pageSize, String search, String searchString) {
+		return adminDAO.getAdminMemberListSearch(startIndexNo, pageSize, search, searchString);
+	}
+	
+	@Override
+	public int setProductInput(ProductVO vo, MultipartFile fName1, MultipartFile fName2) {
+		int res = 0;
+		UUID uid = UUID.randomUUID();
+		String oFileName = fName1.getOriginalFilename();
+		String saveFileName = uid + "_" + oFileName;
+		String oFileName2= fName2.getOriginalFilename();
+		String saveFileName2 = uid + "_" + oFileName2;
+		
+		// 메모리에 올라와 있는 파일의 정보를 실제 서버 파일시스템에 저장처리한다.
+		try {
+			writeFile(fName1, saveFileName, "product");
+			writeFile(fName2, saveFileName2, "product");
+			vo.setThmbnail(saveFileName);
+			vo.setContent(saveFileName2);
+			adminDAO.setProductInput(vo);
+			res = 1;
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return res;
+	}
+	
+	public void writeFile(MultipartFile fName, String saveFileName, String flag) throws IOException {
+		byte[] data = fName.getBytes();
+		
+		HttpServletRequest request = ((ServletRequestAttributes)RequestContextHolder.currentRequestAttributes()).getRequest();
+		String realPath = "";
+		if(flag.equals("product"))  realPath = request.getSession().getServletContext().getRealPath("/resources/data/product/");
+		else if(flag.equals("recipe"))  realPath = request.getSession().getServletContext().getRealPath("/resources/data/recipe/");
+		else if(flag.equals("todayRecipe"))  realPath = request.getSession().getServletContext().getRealPath("/resources/data/todayRecipe/");
+		
+		FileOutputStream fos = new FileOutputStream(realPath + saveFileName);
+		fos.write(data);
+		fos.close();
+	}
+	
+	@Override
+	public void imgCheck(String content) {
+		//             0         1         2         3         4
+		//             01234567890123456789012345678901234567890
+		// <img alt="" src="/javawebS/data/ckeditor/230616141341_sanfran.jpg" style="height:300px; width:400px" /></p><p><img alt="" src="/javawebS/data/ckeditor/230616141353_paris.jpg" style="height:300px; width:400px" /></p>
+		// <img alt="" src="/javawebS/data/product/230616141341_sanfran.jpg" style="height:300px; width:400px" /></p><p><img alt="" src="/javawebS/data/ckeditor/230616141353_paris.jpg" style="height:300px; width:400px" /></p>
+		
+		// content안에 그림파일이 존재한다면 그림을 /data/product/폴더로 복사처리한다. 없으면 돌려보낸다.
+		if(content.indexOf("src=\"/") == -1) return;
+		
+		HttpServletRequest request = ((ServletRequestAttributes)RequestContextHolder.currentRequestAttributes()).getRequest();
+		String realPath = request.getSession().getServletContext().getRealPath("/resources/data/");
+		
+		int position = 29;
+		String nextImg = content.substring(content.indexOf("src=\"/") + position);
+		boolean sw = true;
+		
+		while(sw) {
+			String imgFile = nextImg.substring(0, nextImg.indexOf("\""));
+			
+			String origFilePath = realPath + "ckeditor/" + imgFile;
+			String copyFilePath = realPath + "product/" + imgFile;
+			
+			fileCopyCheck(origFilePath, copyFilePath);	// ckeditor폴더의 그림파일을 product폴더위치로 복사처리한다.
+			
+			if(nextImg.indexOf("src=\"/") == -1) {
+				sw = false;
+			}
+			else {
+				nextImg = nextImg.substring(nextImg.indexOf("src=\"/") + position);
+			}
+		}
+	}
+
+	// 파일을 복사처리...
+	private void fileCopyCheck(String origFilePath, String copyFilePath) {
+		try {
+			FileInputStream  fis = new FileInputStream(new File(origFilePath));
+			FileOutputStream fos = new FileOutputStream(new File(copyFilePath));
+			
+			byte[] bytes = new byte[2048];
+			int cnt = 0;
+			while((cnt = fis.read(bytes)) != -1) {
+				fos.write(bytes, 0, cnt);
+			}
+			fos.flush();
+			fos.close();
+			fis.close();		
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	@Override
+	public ArrayList<ProductVO> getPart() {
+		return adminDAO.getPart();
+	}
+
+	@Override
+	public List<ProductVO> getProductList(String part) {
+		return adminDAO.getProductList(part);
+	}
+
+	@Override
+	public List<ProductVO> getProductName(String part, String productName) {
+		return adminDAO.getProductName(part,productName);
+	}
+
+	@Override
+	public ProductVO getProductInfor(String productName) {
+		return adminDAO.getProductInfor(productName);
+	}
+
+	@Override
+	public List<OptionVO> getOptionList(int productIdx) {
+		return adminDAO.getOptionList(productIdx);
+	}
+
+	@Override
+	public int getOptionSame(int productIdx, String optionName) {
+		return adminDAO.getOptionSame(productIdx, optionName);
+	}
+
+	@Override
+	public void setOptionInput(OptionVO vo) {
+		adminDAO.setOptionInput(vo);
+	}
+
+	@Override
+	public ProductVO getProduct(int idx) {
+		return adminDAO.getProduct(idx);
+	}
+
+	@Override
+	public ArrayList<OptionVO> getOption(int productIdx) {
+		return adminDAO.getOption(productIdx);
+	}
+
+	@Override
+	public void setOptionDelete(int idx) {
+		adminDAO.setOptionDelete(idx);
+	}
+
+	@Override
+	public void setNewsLetter(TodayRecipeVO vo) {
+		adminDAO.setNewsLetter(vo);
+	}
+
+	@Override
+	public void setRecipeSave(RecipeVO vo, MultipartHttpServletRequest mFile) {
+		try {
+			List<MultipartFile> fileList = mFile.getFiles("file");
+			//String oFileNames = "";
+			String sFileNames = "";
+			for(MultipartFile file : fileList) {
+				String oFileName = file.getOriginalFilename();
+				String sFileName = saveFileName(oFileName);
+				System.out.println("oFileName : " + oFileName);
+				// 파일을 서버에 저장처리...
+				writeFile(file, sFileName, "recipe");
+				
+				// 여러개의 파일명을 관리...
+				//oFileNames += oFileName + "/";
+				sFileNames += sFileName + "/";
+			}
+			vo.setFile(sFileNames);
+			//vo.setFile2(sFileNames);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		adminDAO.setRecipeSave(vo);
+	}
+
+
+	// 화일명 중복방지를 위한 저장파일명 만들기
+	private String saveFileName(String oFileName) {
+		String fileName = "";
+		
+		Calendar cal = Calendar.getInstance();
+		fileName += cal.get(Calendar.YEAR);
+		fileName += cal.get(Calendar.MONTH);
+		fileName += cal.get(Calendar.DATE);
+		fileName += cal.get(Calendar.HOUR);
+		fileName += cal.get(Calendar.MINUTE);
+		fileName += cal.get(Calendar.SECOND);
+		fileName += cal.get(Calendar.MILLISECOND);
+		fileName += "_" + oFileName;
+		
+		return fileName;
+	}
+
+	@Override
+	public ArrayList<RecipeVO> getRecipeList(String part) {
+		return adminDAO.getRecipeList(part);
+	}
+
+	@Override
+	public RecipeVO getRecipeContent(int idx) {
+		return adminDAO.getRecipeContent(idx);
+	}
+
+	@Override
+	public void setProductDelete(int idx, int productIdx) {
+		adminDAO.setProductDelete(idx, productIdx);
+	}
+
+	@Override
+	public void setRecipeDelete(int idx) {
+		adminDAO.setRecipeDelete(idx);
+	}
+
+	@Override
+	public void setTodayRecipeSave(TodayRecipeVO vo, MultipartFile file) {
+		try {
+			List<MultipartFile> fileList = file.getOriginalFilename("file");
+			//String oFileNames = "";
+			String sFileNames = "";
+			for(MultipartFile file1 : fileList) {
+				String oFileName = file.getOriginalFilename();
+				String sFileName = saveFileName(oFileName);
+
+				// 파일을 서버에 저장처리...
+				writeFile(file, sFileName, "todayRecipe");
+				
+				sFileNames += sFileName + "/";
+			}
+			vo.setArticle(sFileNames);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		adminDAO.setRecipeSave(vo);
+	}
+
+
+
+
+	
+}

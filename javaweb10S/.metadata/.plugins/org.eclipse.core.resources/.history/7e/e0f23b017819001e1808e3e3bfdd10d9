@@ -1,0 +1,14 @@
+show tables;
+
+create table product2(
+	idx             int not null auto_increment,   /* 상품 고유번호 */
+	productName     varchar(100) not null,         /* 상품명 */
+	thmbnail        varchar(100) not null,         /* 상품 대표사진 */
+	price           varchar(20) not null,          /* 상품 가격 */
+	discount        varchar(20) default 0,         /* 상품 할인가 */
+	discountRate    varchar(20) default 0,         /* 상품 할인률 */
+	detail          text not null,                 /* 상세설명 */
+	ingredient      varchar(200) not null,         /* 상품 재료 */
+	openSw          char(2) default 'OK',           /* 상품 공개여부 */
+	primary key(idx)
+);

@@ -1,0 +1,96 @@
+package com.spring.javaweb10S;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+
+import javax.servlet.http.HttpSession;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import com.spring.javaweb10S.service.ShopService;
+import com.spring.javaweb10S.vo.ItemCartVO;
+import com.spring.javaweb10S.vo.ItemOrderVO;
+import com.spring.javaweb10S.vo.OptionVO;
+import com.spring.javaweb10S.vo.ProductVO;
+
+@Controller
+@RequestMapping("/shop")
+public class ShopController {
+
+	@Autowired
+	ShopService shopService;
+	
+	// 가게 메뉴를 누른 후 화면으로 이동
+	@RequestMapping(value = "/itemList", method = RequestMethod.GET)
+	public String itemListGet(Model model,
+			@RequestParam(name="part", defaultValue="전체", required=false) String part) {
+		ArrayList<ProductVO> partVOS = shopService.getItemPart();
+		ArrayList<String> parts = new ArrayList<>();
+		
+		for(ProductVO partVO : partVOS) {
+			if(partVO.getPart().equals("freshFood")) parts.add("신선식품");
+			else if(partVO.getPart().equals("processedFood")) parts.add("가공식품");
+			else if(partVO.getPart().equals("kitchenWare")) parts.add("주방용품");
+		}
+		model.addAttribute("partVOS",partVOS);
+		model.addAttribute("parts",parts);
+		model.addAttribute("part",part);
+		
+		ArrayList<ProductVO> itemVOS = shopService.getPartItemList(part);
+		model.addAttribute("itemVOS",itemVOS);
+		
+		return "shop/itemList";
+	}
+	
+	// 상품 상세정보 창으로 이동
+	@RequestMapping(value = "/itemContent", method = RequestMethod.GET)
+	public String itemContentGet(int idx, Model model) {
+		ProductVO productVO = shopService.getItemContent(idx); // 상품의 상세정보 불러오기
+		ArrayList<OptionVO> optionVOS = shopService.getItemOption(idx); // 상품의 옵션 정보 불러오기
+		
+		model.addAttribute("productVO",productVO);
+		model.addAttribute("optionVOS",optionVOS);
+		
+		return "shop/itemContent";
+	}
+	
+	//상품상세정보보기창에서 '장바구니'버튼, '주문하기'버튼을 클릭하면 모두 이곳을 거쳐서 이동처리했다.
+	// '장바구니'버튼에서는 '다시쇼핑하기'처리했고, '주문하기'버튼에서는 '주문창(장바구니창)'으로 보내도록 처리했다.
+	@RequestMapping(value="/shop/itemCart", method=RequestMethod.POST)
+	public String dbProductContentPost(ItemCartVO vo, HttpSession session, String flag) {
+		// DBCartVO(vo) : 사용자가 선택한 품목(기본품목+옵션)의 정보를 담고 있는 VO
+		// DBCartVO(resVo) : 사용자가 기존에 장바구니에 담아놓은적이 있는 품목(기본품목+옵션)의 정보를 담고 있는 VO
+		String mid = (String) session.getAttribute("sMid");
+		ItemCartVO resVo = shopService.getCartProductOptionSearch(vo.getProductName(), vo.getOptionName(), mid);
+		if(resVo != null) {		// 기존에 구매한적이 있었다면 '현재 구매한 내역'과 '기존 장바구니의 수량'을 합쳐서 'Update'시켜줘야한다.
+			String[] voOptionNums = vo.getOptionNum().split(",");
+			String[] resOptionNums = resVo.getOptionNum().split(",");
+			int[] nums = new int[99];
+			String strNums = "";
+			for(int i=0; i<voOptionNums.length; i++) {
+				nums[i] += (Integer.parseInt(voOptionNums[i]) + Integer.parseInt(resOptionNums[i]));
+				strNums += nums[i];
+				if(i < nums.length - 1) strNums += ",";
+			}
+			vo.setOptionNum(strNums);
+			shopService.dbShopCartUpdate(vo);
+		}		// 처음 구매하는 제품이라면 장바구니에 insert시켜준다.
+		else {
+			shopService.dbShopCartInput(vo);
+		}
+		
+		if(flag.equals("order")) {
+			return "redirect:/message/cartOrderOk";
+		}
+		else {
+			return "redirect:/message/cartInputOk";
+		}
+	}
+	
+}

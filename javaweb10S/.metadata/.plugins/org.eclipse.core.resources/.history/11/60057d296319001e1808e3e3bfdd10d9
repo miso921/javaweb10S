@@ -1,0 +1,19 @@
+package com.spring.javaweb10S.dao;
+
+import java.util.List;
+
+import org.apache.ibatis.annotations.Param;
+
+import com.spring.javaweb10S.vo.MemberVO;
+
+public interface AdminDAO {
+
+	public int totRecCnt();
+
+	public List<MemberVO> getAdminMemberList(@Param("startIndexNo") int startIndexNo, @Param("pageSize") int pageSize);
+
+	public void setMemberDelete(@Param("idx") int idx);
+
+	public void setAdminMemberLevelTotalChange(@Param("item") String item, @Param("level") int level);
+
+}

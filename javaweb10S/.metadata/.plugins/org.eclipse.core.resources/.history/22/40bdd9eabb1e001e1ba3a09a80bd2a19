@@ -1,0 +1,19 @@
+package com.spring.javaweb10S.service;
+
+import java.util.ArrayList;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.spring.javaweb10S.dao.ShopDAO;
+import com.spring.javaweb10S.vo.OptionVO;
+import com.spring.javaweb10S.vo.ProductVO;
+
+@Service
+public class RecipeServiceImpl implements ShopService {
+	
+	@Autowired
+	RecipeDAO recipeDAO;
+
+
+}

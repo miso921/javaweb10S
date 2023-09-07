@@ -1,0 +1,6 @@
+package com.spring.javaweb10S.service;
+
+@service
+public class TodayRecipeServiceImpl implements TodayRecipeService {
+
+}

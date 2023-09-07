@@ -1,0 +1,16 @@
+package com.spring.javaweb10S.vo;
+
+import lombok.Data;
+
+@Data
+public class CrawlingVO {
+	public CrawlingVO(String title, String article, String date) {
+		title = this.title;
+		article = this.article;
+		date = this.date;
+	}
+	private String title;
+	private String article;
+	private String date;
+	
+}

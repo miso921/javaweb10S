@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Mapper 가져오기 -->
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.spring.javaweb10S.dao.MemberDAO">
+
+	<select id="getMemberIdCheck" resultType="com.spring.javaweb10S.vo.MemberVO">
+		select * from member2 where mid = #{mid};
+	</select>
+	
+	<select id="getMemberFindMid" resultType="String">
+		select mid from member2 where name = #{name} and email = #{email};
+	</select>
+	
+	<select id="getSearch" resultType="com.spring.javaweb10S.vo.ProductVO">
+		SELECT *
+    FROM product2
+    WHERE productName LIKE CONCAT('%', #{searchString}, '%')
+
+	</select>
+	
+	
+	<insert id="setMemberJoinOk">
+		insert into member2 (idx, name, mid, pwd, email, gender, userDel, level, point, todayCnt, startDate, lastDate) values (default,#{vo.name},#{vo.mid},#{vo.pwd},#{vo.email},default,default,default,default,default,default,default);
+	</insert>
+	
+	<update id="setTodayCntReset">
+		update member2 set todayCnt = 0, lastDate = now() where mid = #{mid};
+	</update>
+	
+	<update id="setMemberVisitUpdate">
+		update member2 set todayCnt = todayCnt + 1 where mid = #{vo.mid};
+	</update>
+	
+	<update id="setMemberVisitPointUpdate">
+		update member2 set todayCnt = todayCnt + 1, point = point + 100 where mid = #{vo.mid};
+	</update>
+	
+	<update id="setMemberPwdUpdate">
+		update member2 set pwd = #{pwd} where mid = #{mid};
+	</update>
+
+	<update id="setMemberProfileInput">
+		update member2 set photo = #{photo} where mid = #{mid};
+	</update>
+	
+	<update id="setMemberUpdateOk">
+		update member2 set name = #{vo.name}, email = #{vo.email}, address = #{vo.address}, tel = #{vo.tel}, birthday = #{vo.birthday}, gender = #{vo.gender} where mid = #{vo.mid};
+	</update>
+	
+	<update id="setUserDelCheck">
+		update member2 set userDel = "OK" where mid = #{mid};
+	</update>
+	
+</mapper>

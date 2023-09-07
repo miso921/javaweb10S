@@ -1,0 +1,58 @@
+package com.spring.javaweb10S;
+
+import java.util.ArrayList;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import com.spring.javaweb10S.service.ShopService;
+import com.spring.javaweb10S.vo.OptionVO;
+import com.spring.javaweb10S.vo.ProductVO;
+
+@Controller
+@RequestMapping("/shop")
+public class RecipeController {
+
+	@Autowired
+	RecipeService shopService;
+	
+	// 가게 메뉴를 누른 후 화면으로 이동
+	@RequestMapping(value = "/itemList", method = RequestMethod.GET)
+	public String itemListGet(Model model,
+			@RequestParam(name="part", defaultValue="전체", required=false) String part) {
+		ArrayList<ProductVO> partVOS = shopService.getItemPart();
+		ArrayList<String> parts = new ArrayList<>();
+		
+		for(ProductVO partVO : partVOS) {
+			if(partVO.getPart().equals("freshFood")) parts.add("신선식품");
+			else if(partVO.getPart().equals("processedFood")) parts.add("가공식품");
+			else if(partVO.getPart().equals("kitchenWare")) parts.add("주방용품");
+		}
+		model.addAttribute("partVOS",partVOS);
+		model.addAttribute("parts",parts);
+		model.addAttribute("part",part);
+		
+		ArrayList<ProductVO> itemVOS = shopService.getPartItemList(part);
+		model.addAttribute("itemVOS",itemVOS);
+		
+		return "shop/itemList";
+	}
+	
+	// 상품 상세정보 창으로 이동
+	@RequestMapping(value = "/itemContent", method = RequestMethod.GET)
+	public String itemContentGet(int idx, Model model) {
+		ProductVO productVO = shopService.getItemContent(idx); // 상품의 상세정보 불러오기
+		ArrayList<OptionVO> optionVOS = shopService.getItemOption(idx); // 상품의 옵션 정보 불러오기
+		
+		model.addAttribute("productVO",productVO);
+		model.addAttribute("optionVOS",optionVOS);
+		
+		return "shop/itemContent";
+	}
+	
+	
+}

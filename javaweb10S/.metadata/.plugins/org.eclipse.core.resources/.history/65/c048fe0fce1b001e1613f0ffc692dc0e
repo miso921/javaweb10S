@@ -1,0 +1,16 @@
+show tables;
+
+create table recipe2 (
+	idx      int not null auto_incerment,  /* 레시피 고유번호 */
+	part     varchar(10) not null,         /* 분류 */
+	foodName varchar(100) not null,        /* 요리명 */
+	thmbnail varchar(100) not null,        /* 대표사진 */
+	star     char(8) not null,             /* 난이도 */
+	cookTime varchar(50) not null, 	       /* 조리시간 */
+	like     char(2),                      /* 찜하기 */
+	detail   text not null,                /* 상세설명 */	
+	openSw   char(6) default 'Ok',         /* 공개여부 */
+	item     varchar(200),                 /* 관련상품 */
+	primary key(idx)
+);
+

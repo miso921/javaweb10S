@@ -1,0 +1,5 @@
+package com.spring.javaweb10S.vo;
+
+public class OptionVO {
+
+}

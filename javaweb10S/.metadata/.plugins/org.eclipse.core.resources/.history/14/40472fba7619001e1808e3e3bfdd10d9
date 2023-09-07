@@ -1,0 +1,8 @@
+show tables;
+
+create table product2(
+	idx             int not null auto_increment,   /* 상품 고유번호 */
+	productName     varchar(100) not null,         /* 상품명 */
+	thmbnail        varchar(100) not null,         /* 상품 대표사진 */
+	money           varchar(20) not null,          /* 상품 가격 */
+);

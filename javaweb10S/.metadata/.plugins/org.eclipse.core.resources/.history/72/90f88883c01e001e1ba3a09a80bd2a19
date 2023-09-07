@@ -1,0 +1,8 @@
+package com.spring.javaweb10S.service;
+
+import org.springframework.stereotype.Service;
+
+@Service
+public class TodayRecipeServiceImpl implements TodayRecipeService {
+
+}

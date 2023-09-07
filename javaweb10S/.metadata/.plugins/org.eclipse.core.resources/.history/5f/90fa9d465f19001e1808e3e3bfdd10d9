@@ -1,0 +1,16 @@
+package com.spring.javaweb10S.service;
+
+import java.util.List;
+
+import com.spring.javaweb10S.vo.MemberVO;
+
+public interface AdminService {
+
+	public List<MemberVO> getAdminMemberList(int startIndexNo, int pageSize);
+
+	public void setMemberDelete(int idx);
+
+	public void setAdminMemberLevelTotalChange(String[] changeItem);
+
+
+}

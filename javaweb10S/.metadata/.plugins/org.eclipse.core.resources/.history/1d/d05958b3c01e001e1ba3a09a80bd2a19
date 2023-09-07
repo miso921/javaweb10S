@@ -1,0 +1,14 @@
+package com.spring.javaweb10S.service;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.spring.javaweb10S.dao.ShopDAO;
+import com.spring.javaweb10S.dao.TodayRecipeDAO;
+
+@Service
+public class TodayRecipeServiceImpl implements TodayRecipeService {
+
+	@Autowired
+	TodayRecipeDAO todayRecipeDAO;
+}

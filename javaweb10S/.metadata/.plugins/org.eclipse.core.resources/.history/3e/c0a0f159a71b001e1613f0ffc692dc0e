@@ -1,0 +1,13 @@
+package com.spring.javaweb10S.service;
+
+import java.util.ArrayList;
+
+import com.spring.javaweb10S.vo.ProductVO;
+
+public interface ShopService {
+
+	public ArrayList<ProductVO> getItemPart();
+
+	public ArrayList<ProductVO> getItemList(String part);
+
+}

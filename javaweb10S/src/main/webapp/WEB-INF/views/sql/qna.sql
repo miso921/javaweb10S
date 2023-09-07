@@ -1,0 +1,14 @@
+show tables;
+
+create table qna2(
+	idx        int not null auto_increment,    /* 문의글 고유번호 */
+	part       varchar(10) default '상품',      /* 문의글 분류(상품, 레시피) */
+	title      varchar(100) not null,          /* 문의글 제목 */
+	mid        varchar(30) not null,           /* 문의글 작성자 아이디 */
+	content    text not null,                  /* 문의글 내용 */
+	readNum    int default 0,                  /* 문의글 조회수 */
+	hostIp     varchar(40) not null,           /* 작성자 IP주소 */
+	openSw     char(6) default 'OK',           /* 문의글 공개여부(OK,NO) */
+	wDate      datetime default now(),         /* 문의글 작성일자 */
+	replyCheck varchar(10) default '문의중',     /* 문의글 답변여부(문의중, 답변대기중, 답변완료) */
+);

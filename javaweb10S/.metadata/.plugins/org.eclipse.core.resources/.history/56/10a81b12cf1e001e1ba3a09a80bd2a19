@@ -1,0 +1,22 @@
+package com.spring.javaweb10S.service;
+
+import java.util.ArrayList;
+
+import com.spring.javaweb10S.vo.ItemOrderVO;
+import com.spring.javaweb10S.vo.OptionVO;
+import com.spring.javaweb10S.vo.ProductVO;
+
+public interface ShopService {
+
+	public ArrayList<ProductVO> getItemPart();
+
+	public ArrayList<ProductVO> getPartItemList(String part);
+
+	public ProductVO getItemContent(int idx);
+
+	public ArrayList<OptionVO> getItemOption(int productIdx);
+
+	public ItemOrderVO getOrderMaxIdx();
+
+
+}

@@ -1,0 +1,27 @@
+show tables;
+
+create table todayRecipe2 (
+	idx       int not null auto_increment,  /* 오늘의레시피 고유번호 */
+	recipeIdx int not null, 	              /* 레시피 연결 번호 */
+	title     varchar(100) not null,        /* 레터 제목 */
+	article   text not null,                /* 레터 기사 */
+	issueDate date() not null,              /* 레터 작성일 */
+	openSw    char(2) default 'OK',         /* 공개여부 */
+	primary key(idx),
+	foreign key FK_recipeIdx(recipeIdx) references recipe2(recipeIdx)
+);
+
+create table todayRecipe2 (
+	idx       int not null auto_increment,  /* 오늘의레시피 고유번호 */
+	title     varchar(100) not null,        /* 레터 제목 */
+	article   text not null,                /* 레터 기사 */
+	issueDate date not null,                /* 레터 작성일 */
+	primary key(idx)
+);
+
+desc todayRecipe2;
+drop table todayRecipe2;
+
+RENAME TABLE todayRecipe1 TO todayRecipe2;
+
+desc todayRecipe2;

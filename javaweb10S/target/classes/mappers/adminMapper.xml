@@ -1,0 +1,266 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Mapper 가져오기 -->
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.spring.javaweb10S.dao.AdminDAO">
+
+	<select id="totRecCnt" resultType="int">
+		SELECT COUNT(*) FROM member2;
+	</select>
+	
+	<select id="getAdminMemberList" resultType="com.spring.javaweb10S.vo.MemberVO">
+		SELECT * FROM member2 ORDER BY idx DESC LIMIT #{startIndexNo},#{pageSize};
+	</select>
+	
+	<select id="getAdminMemberListSearch" resultType="com.spring.javaweb10S.vo.MemberVO">
+		SELECT * FROM member2 WHERE ${search} like CONCAT('%',#{searchString},'%') ORDER BY idx DESC LIMIT #{startIndexNo}, #{pageSize};
+	</select>
+	
+	<select id="getPart" resultType="com.spring.javaweb10S.vo.ProductVO">
+		SELECT part FROM product2 GROUP BY part ORDER BY part;
+	</select>
+	
+	<select id="getProductList" resultType="com.spring.javaweb10S.vo.ProductVO">
+	  SELECT * FROM product2 <if test='part!="전체"'> WHERE part=#{part}</if> ORDER BY idx DESC;
+		<!-- select part from product2 group by part order by part; -->
+	</select>
+	
+	<select id="getProductName" resultType="com.spring.javaweb10S.vo.ProductVO">
+	  SELECT * FROM product2 WHERE part = #{part};
+	</select>
+	
+	<select id="getProductInfor" resultType="com.spring.javaweb10S.vo.ProductVO">
+	  SELECT product2.* FROM product2 where productName = #{productName} ORDER BY idx LIMIT 1;
+	</select>
+	
+	<select id="getOptionList" resultType="com.spring.javaweb10S.vo.OptionVO">
+	  SELECT * FROM option2 where productIdx = #{productIdx} ORDER BY optionName;
+	</select>
+	
+	<select id="getOptionSame" resultType="int">
+    SELECT COUNT(*) FROM option2 WHERE productIdx = #{productIdx} and optionName = #{optionName};
+  </select>
+  
+	<select id="getProduct" resultType="com.spring.javaweb10S.vo.ProductVO">
+    SELECT * FROM product2 WHERE idx = #{idx};
+  </select>
+	
+	<select id="getOption" resultType="com.spring.javaweb10S.vo.OptionVO">
+    SELECT * FROM option2 WHERE productIdx = #{productIdx} order by optionName;
+  </select>
+	
+	<select id="getRecipePart" resultType="com.spring.javaweb10S.vo.RecipeVO">
+    SELECT part FROM recipe2 GROUP BY part ORDER BY part;
+  </select>
+	
+	<select id="getPartRecipeList" resultType="com.spring.javaweb10S.vo.RecipeVO">
+		<if test='part == "전체"'>
+			SELECT * FROM recipe2 ORDER BY idx DESC;
+		</if>
+		<if test='part != "전체"'>
+			SELECT * FROM recipe2 WHERE part = #{part} ORDER BY idx DESC;
+		</if>
+	</select>
+	
+	<select id="getRecipeContent" resultType="com.spring.javaweb10S.vo.RecipeVO">
+		SELECT * FROM recipe2 WHERE idx = #{idx};
+	</select>
+	
+	<select id="getTodayRecipeList" resultType="com.spring.javaweb10S.vo.TodayRecipeVO">
+ 		SELECT *, TIMESTAMPDIFF(HOUR, issueDate, NOW()) AS hour_diff FROM todayRecipe2 ORDER BY issueDate DESC LIMIT #{startIndexNo}, #{pageSize};
+	</select>
+	
+	<select id="getTodayRecipeSearch" resultType="com.spring.javaweb10S.vo.TodayRecipeVO">
+		SELECT * FROM todayRecipe2 WHERE ${search} LIKE CONCAT('%',#{searchString},'%') ORDER BY issueDate DESC LIMIT #{startIndexNo}, #{pageSize};
+	</select>
+	
+	<select id="getTodayRecipeContent" resultType="com.spring.javaweb10S.vo.TodayRecipeVO">
+		SELECT * FROM todayRecipe2 WHERE idx = #{idx};
+	</select>
+	
+	<select id="getMainList" resultType="com.spring.javaweb10S.vo.MainVO">
+		SELECT * FROM mainSetting2 WHERE slideName = #{slideName};
+	</select>
+	
+	<select id="getMainSetting" resultType="com.spring.javaweb10S.vo.MainVO">
+		SELECT * FROM mainSetting2 ORDER BY slideName;
+	</select>
+	
+	<select id="getTodayRecipeSub" resultType="com.spring.javaweb10S.vo.TodayRecipeSubVO">
+		SELECT * FROM todayRecipeSub2 ORDER BY idx DESC LIMIT #{startIndexNo}, #{pageSize};
+	</select>
+	
+	<select id="getTodayRecipe" resultType="com.spring.javaweb10S.vo.TodayRecipeVO">
+		SELECT * FROM todayRecipe2 ORDER BY idx DESC;
+	</select>
+	
+	<select id="getTodayRecipeSubList" resultType="com.spring.javaweb10S.vo.TodayRecipeSubVO">
+		SELECT * FROM todayRecipeSub2 WHERE mail = #{mail};
+	</select>
+	
+	<select id="getInquiryList" resultType="com.spring.javaweb10S.vo.InquiryVO">
+		<if test="part == '전체'">
+      SELECT * FROM inquiry2 ORDER BY idx DESC LIMIT #{startIndexNo},#{pageSize};
+    </if>
+    <if test="part != '전체'">
+      SELECT * FROM inquiry2 WHERE reply = #{part} ORDER BY idx DESC LIMIT #{startIndexNo},#{pageSize};
+    </if>
+	</select>
+	
+	<select id="getInquiryContent" resultType="com.spring.javaweb10S.vo.InquiryVO">
+    SELECT * FROM inquiry2 WHERE idx = #{idx};
+  </select>
+	
+	<select id="totRecCntAdmin" resultType="int">
+    <if test="part == '전체'">
+      SELECT COUNT(*) FROM inquiry2;
+    </if>
+    <if test="part != '전체'">
+      SELECT COUNT(*) FROM inquiry2 WHERE part = #{part};
+    </if>
+  </select>
+  
+  <select id="getInquiryReplyContent" resultType="com.spring.javaweb10S.vo.InquiryReplyVO">
+    SELECT * FROM inquiry2Reply WHERE inquiryIdx = #{idx};
+  </select>
+  
+  <select id="totRecCntAdminStatus" resultType="int">
+    <if test="orderStatus == '전체'">
+      SELECT COUNT(*) FROM itemOrder2 o JOIN itemDelivery2 d USING(orderNum) <![CDATA[ WHERE DATE(orderDate) >= DATE(#{startJumun}) AND DATE(orderDate) <= DATE(#{endJumun}) ORDER BY orderDate DESC ]]>;
+    </if>
+    <if test="orderStatus != '전체'">
+      SELECT COUNT(*) FROM itemOrder2 o JOIN itemDelivery2 d USING(orderNum) <![CDATA[ WHERE DATE(orderDate) >= DATE(#{startJumun}) AND DATE(orderDate) <= DATE(#{endJumun}) AND d.orderStatus=#{orderStatus} ORDER BY orderDate DESC ]]>;
+    </if>
+  </select>
+  
+  <select id="getAdminOrderList" resultType="com.spring.javaweb10S.vo.ItemDeliveryVO">
+    <if test='orderStatus == "전체"'>
+      SELECT * FROM itemOrder2 o JOIN itemDelivery2 d USING(orderNum) 
+      <![CDATA[ WHERE DATE(orderDate) >= DATE(#{startJumun}) AND DATE(orderDate) <= DATE(#{endJumun}) ORDER BY orderDate DESC ]]> 
+      LIMIT #{startIndexNo},#{pageSize};
+    </if>
+    <if test='orderStatus != "전체"'>
+      SELECT * FROM itemOrder2 o JOIN itemDelivery2 d USING(orderNum) 
+      <![CDATA[ WHERE DATE(orderDate) >= DATE(#{startJumun}) AND DATE(orderDate) <= DATE(#{endJumun}) AND d.orderStatus=#{orderStatus} ORDER BY orderDate DESC ]]> 
+      LIMIT #{startIndexNo}, #{pageSize};
+    </if>
+  </select>
+  
+  <select id="getMemberGenderCnt" resultType="com.spring.javaweb10S.vo.MemberVO">
+  	SELECT date_list.startDate, COALESCE(SUM(member2.startDate), 0) AS visitCount 
+  	FROM ( SELECT DATE_SUB(CURDATE(), INTERVAL 20 DAY) + INTERVAL (a.a + (10 * b.a) + (100 * c.a)) DAY AS startDate 
+  	FROM (SELECT 0 AS a UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9) AS a CROSS 
+  	JOIN (SELECT 0 AS a UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9) AS b CROSS 
+  	JOIN (SELECT 0 AS a UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9) AS c 
+  	WHERE DATE_SUB(CURDATE(), INTERVAL 20 DAY) + INTERVAL (a.a + (10 * b.a) + (100 * c.a)) DAY <![CDATA[<=]]> CURDATE() ) AS date_list LEFT JOIN member2 ON DATE(member2.startDate) <![CDATA[<=]]> date_list.startDate  
+  	GROUP BY date_list.startDate ORDER BY date_list.startDate
+  </select>
+
+	<select id="getReviewList" resultType="com.spring.javaweb10S.vo.ReviewVO">
+		SELECT * FROM review2;
+	</select>
+
+	<select id="getSlideName" resultType="com.spring.javaweb10S.vo.TodayRecipeVO">
+		SELECT * FROM todayRecipe2 WHERE title = #{slideName};
+	</select>
+
+
+
+
+
+
+	
+	
+	
+	<insert id="setProductInput">
+		INSERT INTO product2 VALUES (default,#{vo.part},#{vo.productName},#{vo.price},#{vo.discount},#{vo.discountRate},#{vo.thumbnail},#{vo.content},#{vo.ingredient},#{vo.openSw});
+	</insert>
+	
+	<insert id="setOptionInput">
+		INSERT INTO option2 VALUES (default,#{vo.productIdx},#{vo.optionName},#{vo.optionPrice},#{vo.stock});
+	</insert>
+	
+	<insert id="setNewsLetter">
+		INSERT INTO todayRecipe2 VALUES (default,#{vo.title},#{vo.article},#{vo.issueDate});
+	</insert>
+	
+	<insert id="setRecipeSave">
+		insert into recipe2 values (default,#{vo.part},#{vo.foodName},#{vo.file},#{vo.star},#{vo.cookTime},#{vo.openSw},#{vo.item});
+	</insert>
+
+	<insert id="setTodayRecipeSave">
+		insert into todayRecipe2 values (default,#{vo.title},#{vo.article},default,#{vo.openSw},default);
+	</insert>
+	
+	<insert id="mainSettingSave">
+		insert into mainSetting2 values (default,#{vo.slideName},
+		(select idx from todayRecipe2 where title = #{vo.todayRecipe}),
+		#{vo.slideImg});
+	</insert>
+	
+	<insert id="setInquiryInputAdmin">
+		INSERT INTO inquiry2Reply VALUES (default,#{vo.inquiryIdx},default,#{vo.reContent});
+	</insert>
+	
+	
+	
+	<update id="setMemberLevelChange">
+		UPDATE member2 SET level = #{level} WHERE idx = #{idx};
+	</update>	
+	
+	<update id="setTodayRecipeUpdate">
+		UPDATE todayRecipe2 SET readNum = #{readNum} + 1 WHERE idx = #{idx};
+	</update>	
+	
+	<update id="setMainUpdate">
+		UPDATE mainSetting2 SET todayRecipeIdx = (SELECT idx FROM todayRecipe2 WHERE title = #{vo.todayRecipe}), 
+		slideImg = #{vo.slideImg} WHERE idx = #{idx};
+	</update>	
+	
+	<update id="setInquiryUpdateAdmin">
+    UPDATE inquiry2 SET reply = '답변대기중' WHERE idx = #{inquiryIdx};
+  </update>
+	
+	<update id="setInquiryReplyUpdate">
+    UPDATE inquiry2Reply SET reContent = #{reVO.reContent} WHERE reIdx = #{reVO.reIdx};
+  </update>
+	
+	<update id="setInquiryUpdateAdmin2">
+    UPDATE inquiry2 SET reply = '답변대기중' WHERE idx = #{inquiryIdx};
+  </update>
+	
+	<update id="setOrderStatusUpdate">
+    UPDATE itemDelivery2 SET orderStatus = #{orderStatus} WHERE orderNum = #{orderNum};
+  </update>
+	
+	<update id="setInquiryReplyUpdateOk">
+    UPDATE inquiry2 SET reply = '답변완료' WHERE idx = #{inquiryIdx};
+  </update>
+	
+	
+	
+	<delete id="setMemberDelete">
+		DELETE FROM member2 WHERE idx = #{idx};
+	</delete>
+	
+	<delete id="setOptionDelete">
+		DELETE FROM option2 WHERE idx = #{idx};
+	</delete>
+	
+	<delete id="setProductDelete">
+		DELETE FROM option2 WHERE productIdx = #{idx};
+		DELETE FROM product2 WHERE idx = #{idx};
+	</delete>
+	
+	<delete id="setRecipeDelete">
+		DELETE FROM recipe2 WHERE idx = #{idx};
+	</delete>
+	
+	<delete id="setTodayRecipeDelete">
+		DELETE FROM todayRecipe2 WHERE idx = #{idx};
+	</delete>
+	
+	<delete id="setInquiryReplyDelete">
+		DELETE FROM inquiry2Reply WHERE reIdx = #{reIdx};
+	</delete>
+	
+</mapper>

@@ -1,0 +1,136 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<c:set var="ctp" value="${pageContext.request.contextPath}"/>
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>recipeInput.jsp</title>
+  <link rel="stylesheet" href="${ctp}/font/font.css"/>
+  <jsp:include page="/WEB-INF/views/include/bs4.jsp" />
+  <style>
+    th {
+      text-align: center;
+      background-color: #eee;
+    }
+		.container, h2 {font-family:'SUITE-Regular';}
+	 .star {
+	    position: relative;
+	    font-size: 2rem;
+	    color: #ddd;
+	  }
+	  .star span {
+	    width: 0;
+	    position: absolute; 
+	    left: 0;
+	    color: red;
+	    overflow: hidden;
+	    pointer-events: none;
+	  }
+	  .star input {
+	    width: 100%;
+	    height: 100%;
+	    position: absolute;
+	    left: 0;
+	    opacity: 0;
+	    cursor: pointer;
+	  }
+	</style>
+  <script>
+    'use strict';
+    /*MultipartFile
+    function fCheck() {
+     	let thmbnail = $("#fName1").val();
+    	let content = $("#fName12").val(); 
+    	let maxSize = 1024 * 1024 * 20; // 최대 20MByte 허용
+    	
+    	  if(thmbnail == "" || thmbnail == null || content == "" || content == null) {
+    		alert("업로드할 파일을 선택하세요!");
+    		return false;
+    	}
+    	
+    	// 파일 사이즈 처리
+    	let ext1 = thmbnail.substring(thmbnail.lastIndexOf(".")+1).toUpperCase();
+    	let ext2 = content.substring(content.lastIndexOf(".")+1).toUpperCase();
+    	
+    	if(ext1 != "JPG" && ext1 != "JPEG" && ext1 != "GIF" && ext1 != "PNG" && ext2 != "JPG" && ext2 != "JPEG" && ext2 != "GIF" && ext2 != "PNG") {
+    		alert("업로드 가능한 파일은 'jpg/jpeg/gif/png'확장자 파일입니다.");
+    		return false;
+    	}
+    	if(thmbnail.size > maxSize || content.size > maxSize) {
+    		alert("파일의 최대 허용 용량은 20MByte입니다.");
+    		return false;
+    	}
+    	else {
+    		myform.submit();
+    	}
+    }
+    */
+    function priceCheck() {
+    	let price = $("#price").val();
+    	let discountRate = $("#discountRate").val();
+    	
+    	$("#discount").val(parseInt(price) - (parseInt(price) * parseInt(discountRate) / 100));
+    }
+    
+    const drawStar = (target) => {
+		  const starSpan = document.querySelector('.star span');
+		  starSpan.style.width = target.value * 10 + '%';
+		  
+			const starWidth = target.value * 10; // 별점 값에 따라 필요한 데이터 추출
+  	  
+  	};
+    
+
+    const drawHeart = (target) => {
+      const heartSpan = document.querySelector('.heart span');
+      const filledHeart = '♥';
+      const emptyHeart = '♡';
+      
+      if(target.value == 1) {
+      	heartSpan.textContent = filledHeart;
+      }
+      else {
+      	heartSpan.textContent = emptyHeart;
+      }
+   	};
+    
+  </script>
+</head>
+<body>
+<p><br/></p>
+<div class="container">
+  <h2 class="text-center mb-3">레 시 피 등 록</h2>
+  <form name="myform" method="post" enctype="multipart/form-data">
+    <table class="table table-bordered">
+      
+      <tr>
+        <th>대표사진</th>
+        <td>
+        	<input type="file" name="file1" id="thmbnail" class="form-control" required />
+        	(업로드 가능파일:jpg, jpeg, gif, png)
+      	</td>
+      </tr>
+      <tr>
+        <th>상세내용</th>
+        <td>
+        	<input type="file" name="file2" id="detail" class="form-control-file border" accept=".jpg,.jpeg,.gif,.png" required />
+        	(업로드 가능파일:jpg, jpeg, gif, png)
+        </td>
+      </tr>
+      
+      <tr>
+        <td colspan="2" class="text-center">
+          <input type="submit" value="등록" class="btn btn-primary"/> &nbsp;
+          <input type="reset" value="재입력" class="btn btn-warning"/> &nbsp;
+          <input type="button" value="돌아가기" onclick="location.href='${ctp}/admin/adminMain';" class="btn btn-secondary"/>
+        </td>
+      </tr>
+    </table>
+  </form>
+</div>
+<p><br/></p>
+<jsp:include page="/WEB-INF/views/include/footer.jsp" />
+</body>
+</html>

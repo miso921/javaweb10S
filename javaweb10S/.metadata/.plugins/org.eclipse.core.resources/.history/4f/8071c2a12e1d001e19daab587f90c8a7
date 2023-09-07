@@ -1,0 +1,67 @@
+package com.spring.javaweb10S.service;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
+
+import com.spring.javaweb10S.vo.TodayRecipeVO;
+import com.spring.javaweb10S.vo.MemberVO;
+import com.spring.javaweb10S.vo.OptionVO;
+import com.spring.javaweb10S.vo.ProductVO;
+import com.spring.javaweb10S.vo.RecipeVO;
+
+public interface AdminService {
+
+	public List<MemberVO> getAdminMemberList(int startIndexNo, int pageSize);
+
+	public void setMemberDelete(int idx);
+
+	public void setMemberLevelChange(int level, int idx);
+
+	public List<MemberVO> getAdminMemberListSearch(int startIndexNo, int pageSize, String search, String searchString);
+
+	public void imgCheck(String content);
+
+	public ArrayList<ProductVO> getPart();
+
+	public List<ProductVO> getProductList(String part);
+
+	public int setProductInput(ProductVO vo, MultipartFile file, MultipartFile fName2);
+
+	public List<ProductVO> getProductName(String part, String productName);
+
+	public ProductVO getProductInfor(String productName);
+
+	public List<OptionVO> getOptionList(int productIdx);
+
+	public int getOptionSame(int productIdx, String optionName);
+
+	public void setOptionInput(OptionVO vo);
+
+	public ProductVO getProduct(int idx);
+
+	public ArrayList<OptionVO> getOption(int idx);
+
+	public void setOptionDelete(int idx);
+
+	public void setNewsLetter(TodayRecipeVO vo);
+
+	public void setRecipeSave(RecipeVO vo, MultipartHttpServletRequest file);
+
+	public ArrayList<RecipeVO> getRecipeList(String part);
+
+	public RecipeVO getRecipeContent(int idx);
+
+
+
+
+
+
+
+
+
+
+
+}

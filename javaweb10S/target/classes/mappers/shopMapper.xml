@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Mapper 가져오기 -->
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.spring.javaweb10S.dao.ShopDAO">
+
+	<select id="getItemPart" resultType="com.spring.javaweb10S.vo.ProductVO">
+		SELECT part FROM product2 part GROUP BY part ORDER BY part;
+	</select>
+	
+	<select id="getPartItemList" resultType="com.spring.javaweb10S.vo.ProductVO">
+		<if test='part == "전체"'>
+			SELECT * FROM product2 GROUP BY idx DESC;
+		</if>
+		<if test='part != "전체"'>
+			SELECT * FROM product2 WHERE part = #{part} ORDER BY idx DESC;
+		</if>
+	</select>
+	
+	<select id="getItemContent" resultType="com.spring.javaweb10S.vo.ProductVO">
+		SELECT * FROM product2 WHERE idx = #{idx};
+	</select>
+	
+	<select id="getItemOption" resultType="com.spring.javaweb10S.vo.OptionVO">
+		SELECT * FROM option2 WHERE productIdx = #{productIdx} ORDER BY idx;
+	</select>
+	
+	<select id="getItemCartProductOptionSearch" resultType="com.spring.javaweb10S.vo.ItemCartVO">
+		SELECT * FROM itemCart2 WHERE productName = #{productName} AND optionName = #{optionName} AND mid = #{mid};
+	</select>
+	
+	<select id="getItemCartList" resultType="com.spring.javaweb10S.vo.ItemCartVO">
+		SELECT i.*, p.discountRate AS discountRate, p.discount AS discount, o.stock AS stock
+		FROM itemCart2 i  
+		LEFT JOIN product2 p 
+		 ON i.productIdx = p.idx
+		LEFT JOIN option2 o
+		 ON i.optionIdx = o.idx 
+		 
+		WHERE i.mid = #{mid} ORDER BY i.idx;
+	</select>
+	
+	<select id="getOrderMaxIdx" resultType="com.spring.javaweb10S.vo.ItemOrderVO">
+		SELECT MAX(idx) AS maxIdx FROM itemOrder2;
+	</select>
+	
+	<select id="getCartIdx" resultType="com.spring.javaweb10S.vo.ItemCartVO">
+		SELECT * from itemCart2 WHERE idx = #{idx};
+	</select>
+	
+	<select id="getItemList" resultType="com.spring.javaweb10S.vo.ProductVO">
+		SELECT * FROM product2 ORDER BY idx DESC;
+	</select>
+	
+	<select id="getOrderDelivery" resultType="com.spring.javaweb10S.vo.ItemDeliveryVO">
+		SELECT * FROM itemDelivery2 WHERE orderNum = #{orderNum};
+	</select>
+	
+	<select id="getReviewList" resultType="com.spring.javaweb10S.vo.ReviewVO">
+		SELECT * FROM review2 WHERE productIdx = #{idx};
+	</select>
+	
+	<select id="getMyOrderList" resultType="com.spring.javaweb10S.vo.ItemDeliveryVO">
+    <if test='mid == "전체"'>
+      SELECT oder.*,delivery.*,(select count(*) from review2 where orderNum = oder.orderNum) as reviewCnt 
+      from itemOrder2 oder JOIN itemDelivery2 delivery USING(orderNum) 
+      WHERE date(orderDate) = substring(now(),1,10)
+      ORDER BY delivery.idx DESC LIMIT #{startIndexNo},#{pageSize};
+    </if>
+    <if test='mid != "전체"'>
+      <!--
+      SELECT oder.*, delivery.*,(select count(*) from review2 where orderNum = oder.orderNum) as reviewCnt
+      FROM itemOrder2 oder JOIN itemDelivery2 delivery USING(orderNum) 
+      WHERE delivery.mid=#{mid} AND DATE(orderDate) = substring(NOW(),1,10)
+      ORDER BY delivery.idx DESC LIMIT #{startIndexNo},#{pageSize};
+      -->
+      SELECT oder.*,delivery.*,(select count(*) from review2 where orderNum = oder.orderNum) as reviewCnt
+      from itemOrder2 oder JOIN itemDelivery2 delivery USING(orderNum) 
+      WHERE date(orderDate) = substring(now(),1,10) and delivery.mid=#{mid}
+      ORDER BY delivery.idx DESC LIMIT #{startIndexNo},#{pageSize};
+    </if>
+  </select>
+	
+	<select id="totRecCnt" resultType="int">
+    <if test='mid == "전체"'>
+      SELECT COUNT(*) FROM itemOrder2
+      WHERE DATE(orderDate) = SUBSTRING(NOW(),1,10);
+    </if>
+    <if test='mid != "전체"'>
+      SELECT COUNT(delivery.idx) FROM itemOrder2 inner JOIN itemDelivery2 delivery USING(orderNum), member2 member
+      WHERE member.mid = #{mid} AND DATE(orderDate) = SUBSTRING(NOW(),1,10);
+    </if>
+  </select>
+	
+	<select id="totRecCntMyOrderStatus" resultType="int">
+    <if test="mid == '전체'">
+      SELECT COUNT(*) FROM itemOrder2;
+    </if>
+    <if test="mid != '전체' and conditionOrderStatus == '전체'">
+	    SELECT COUNT(*) FROM itemOrder2 o JOIN itemDelivery2 d USING(orderNum) 
+	    <![CDATA[ WHERE d.mid=#{mid} AND DATE(orderDate) >= DATE(#{startJumun}) AND DATE(orderDate) <= DATE(#{endJumun}) ORDER BY orderDate DESC ]]>;
+    </if>
+    <if test="mid != '전체' and conditionOrderStatus != '전체'">
+	    SELECT count(*) FROM itemOrder2 o JOIN itemDelivery2 d USING(orderNum) 
+	    <![CDATA[ WHERE d.mid=#{mid} AND DATE(orderDate) >= DATE(#{startJumun}) AND DATE(orderDate) <= DATE(#{endJumun}) AND d.orderStatus=#{conditionOrderStatus} ORDER BY orderDate DESC ]]>;
+    </if>
+  </select>
+	 	
+	<select id="getMyOrderStatus" resultType="com.spring.javaweb10S.vo.ItemDeliveryVO">
+		<if test="mid == '전체'">
+      SELECT * FROM itemOrder2;
+    </if>
+    <if test="mid != '전체' and conditionOrderStatus == '전체'">
+	    SELECT * FROM itemOrder2 o JOIN itemDelivery2 d USING(orderNum) 
+	    <![CDATA[ WHERE d.mid=#{mid} AND DATE(orderDate) >= DATE(#{startJumun}) AND DATE(orderDate) <= DATE(#{endJumun}) ORDER BY orderDate DESC ]]>;
+    </if>
+    <if test="mid != '전체' and conditionOrderStatus != '전체'">
+	    SELECT * FROM itemOrder2 o JOIN itemDelivery2 d USING(orderNum) 
+	    <![CDATA[ WHERE d.mid=#{mid} AND DATE(orderDate) >= DATE(#{startJumun}) AND DATE(orderDate) <= DATE(#{endJumun}) AND d.orderStatus=#{conditionOrderStatus} ORDER BY orderDate DESC ]]>;
+    </if>
+	</select>
+	
+<!-- 	<select id="getMyOrderStatus" resultType="com.spring.javaweb10S.vo.ItemDeliveryVO">
+		<if test="mid == '전체'">
+      SELECT * FROM itemDelivery2;
+    </if>
+    <if test="mid != '전체' and conditionOrderStatus == '전체'">
+	    SELECT * FROM itemDelivery2 d JOIN itemOrder2 o USING(orderNum) 
+	    <![CDATA[ WHERE d.mid=#{mid} AND DATE(o.orderDate) >= DATE(#{startJumun}) AND DATE(o.orderDate) <= DATE(#{endJumun}) ORDER BY o.orderDate DESC ]]>;
+    </if>
+    <if test="mid != '전체' and conditionOrderStatus != '전체'">
+	    SELECT * FROM itemDelivery2 d JOIN itemOrder2 o USING(orderNum) 
+	    <![CDATA[ WHERE d.mid=#{mid} AND DATE(o.orderDate) >= DATE(#{startJumun}) AND DATE(o.orderDate) <= DATE(#{endJumun}) AND d.orderStatus=#{conditionOrderStatus} ORDER BY o.orderDate DESC ]]>;
+    </if>
+	</select> -->
+	
+<!-- 	
+	<select id="getMyOrderStatus" resultType="com.spring.javaweb10S.vo.ItemDeliveryVO">
+		<if test="mid == '전체'">
+      SELECT * FROM itemOrder2;
+    </if>
+    <if test="mid != '전체' and conditionOrderStatus == '전체'">
+	    SELECT * FROM itemOrder2 o JOIN itemDelivery2 d USING(orderNum) 
+	    <![CDATA[ WHERE d.mid=#{mid} AND DATE(orderDate) >= DATE(#{startJumun}) AND DATE(orderDate) <= DATE(#{endJumun}) ORDER BY orderDate DESC ]]>;
+    </if>
+    <if test="mid != '전체' and conditionOrderStatus != '전체'">
+	    SELECT * FROM itemOrder2 o JOIN itemDelivery2 d USING(orderNum) 
+	    <![CDATA[ WHERE d.mid=#{mid} AND DATE(orderDate) >= DATE(#{startJumun}) AND DATE(orderDate) <= DATE(#{endJumun}) AND d.orderStatus=#{conditionOrderStatus} ORDER BY orderDate DESC ]]>;
+    </if>
+	</select>
+	 -->
+	<select id="totRecCntMyOrderCondition" resultType="int">
+    SELECT count(*) FROM itemOrder2 o JOIN itemDelivery2 d USING(orderNum)
+	    <![CDATA[ WHERE o.mid=#{mid} AND now() <= date(date_add(orderDate, interval #{conditionDate} day)) ]]>
+  </select>
+	
+	<select id="getOrderCondition" resultType="com.spring.javaweb10S.vo.ItemDeliveryVO">
+    SELECT o.*,d.* 
+	    FROM itemOrder2 o JOIN itemDelivery2 d USING(orderNum) 
+	    <![CDATA[ WHERE d.mid=#{mid} AND now() <= date(date_add(orderDate, interval #{conditionDate} day)) ]]>
+	    ORDER BY orderDate DESC limit #{startIndexNo},#{pageSize};
+  </select>
+  
+  <select id="getProductContent" resultType="com.spring.javaweb10S.vo.ProductVO">
+  	SELECT * FROM product2 WHERE productName = #{productName};
+  </select>
+   
+  <select id="getReviewYesOrNo" resultType="com.spring.javaweb10S.vo.ReviewVO">
+  	SELECT * FROM review2 WHERE productName = #{productName};
+  </select>
+   
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+	<insert id="setItemCartInput">
+		INSERT INTO itemCart2 VALUES (default,default,#{vo.mid},#{vo.productIdx},#{vo.productName},#{vo.price},#{vo.thumbnail},#{vo.optionIdx},#{vo.optionName},#{vo.optionPrice},#{vo.optionNum},#{vo.totalPrice});
+	</insert>
+	
+	<insert id="setItemOrder">
+		INSERT INTO itemOrder2 VALUES (default,#{vo.orderNum},#{vo.mid},#{vo.productIdx},default,#{vo.productName},#{vo.price},#{vo.thumbnail},#{vo.optionName},#{vo.optionPrice},#{vo.optionNum},#{vo.totalPrice});
+	</insert>
+	
+	<insert id="setItemDelivery">
+		INSERT INTO itemDelivery2 VALUES (default,#{itemDeliveryVO.orderIdx},#{itemDeliveryVO.orderNum},#{itemDeliveryVO.orderTotalPrice},#{itemDeliveryVO.mid},#{itemDeliveryVO.name},#{itemDeliveryVO.address},#{itemDeliveryVO.tel},
+		(SELECT thumbnail FROM itemOrder2 WHERE orderNum = #{itemDeliveryVO.orderNum}),
+		#{itemDeliveryVO.message},#{itemDeliveryVO.payment},#{itemDeliveryVO.payMethod},default);
+	</insert>
+	
+	<insert id="setReviewInput">
+		INSERT INTO review2 VALUES (default,#{vo.productIdx},#{vo.orderNum},#{vo.productName},#{vo.mid},#{vo.content},#{vo.photo},#{vo.star},default);
+	</insert>
+	
+	
+	
+	
+	
+	<update id="setItemCartUpdate">
+		UPDATE itemCart2 SET optionNum = #{vo.optionNum}, totalPrice = totalPrice + #{vo.totalPrice} WHERE productName=#{vo.productName} AND optionName=#{vo.optionName};
+	</update>
+	
+	<update id="setMemberPointPlus">
+		UPDATE member2 SET point = point + #{point} WHERE mid = #{mid};
+	</update>
+	
+	<update id="setMemberPointMinus">
+		UPDATE member2 SET point = point - #{point} WHERE mid = #{mid};
+	</update>
+	
+	<update id="setBuyOkUpdate">
+		UPDATE itemDelivery2 SET orderStatus = '구매완료' WHERE orderNum = #{orderNum};
+	</update>
+	
+	
+	
+	
+	
+	
+	
+	<delete id="setCartItemDelete">
+		DELETE FROM itemCart2 WHERE idx = #{idx};
+	</delete>
+	
+	<delete id="setPayCancle">
+		DELETE FROM itemDelivery2 WHERE orderNum = #{orderNum};
+		DELETE FROM itemOrder2 WHERE orderNum = #{orderNum};
+	</delete>
+	
+</mapper>

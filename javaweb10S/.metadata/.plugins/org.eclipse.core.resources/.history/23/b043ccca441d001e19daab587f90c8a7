@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Mapper 가져오기 -->
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.spring.javaweb10S.dao.AdminDAO">
+
+	<select id="totRecCnt" resultType="int">
+		select count(*) from member2;
+	</select>
+	
+	<select id="getAdminMemberList" resultType="com.spring.javaweb10S.vo.MemberVO">
+		select * from member2 order by idx desc limit #{startIndexNo},#{pageSize};
+	</select>
+	
+	<select id="getAdminMemberListSearch" resultType="com.spring.javaweb10S.vo.MemberVO">
+		select * from member2 where ${search} like concat('%',#{searchString},'%') order by idx desc limit #{startIndexNo}, #{pageSize};
+	</select>
+	
+	<select id="getPart" resultType="com.spring.javaweb10S.vo.ProductVO">
+		select part from product2 group by part order by part;
+	</select>
+	
+	<select id="getProductList" resultType="com.spring.javaweb10S.vo.ProductVO">
+	  select * from product2 <if test='part!="전체"'> where part=#{part}</if> order by idx desc;
+		<!-- select part from product2 group by part order by part; -->
+	</select>
+	
+	<select id="getProductName" resultType="com.spring.javaweb10S.vo.ProductVO">
+	  select * from product2 where part = #{part};
+	</select>
+	
+	<select id="getProductInfor" resultType="com.spring.javaweb10S.vo.ProductVO">
+	  select product2.* from product2 where productName = #{productName} order by idx limit 1;
+	</select>
+	
+	<select id="getOptionList" resultType="com.spring.javaweb10S.vo.OptionVO">
+	  select * from option2 where productIdx = #{productIdx} order by optionName;
+	</select>
+	
+	<select id="getOptionSame" resultType="int">
+    select count(*) from option2 where productIdx = #{productIdx} and optionName = #{optionName};
+  </select>
+  
+	<select id="getProduct" resultType="com.spring.javaweb10S.vo.ProductVO">
+    select * from product2 where idx = #{idx};
+  </select>
+	
+	<select id="getOption" resultType="com.spring.javaweb10S.vo.OptionVO">
+    select * from option2 where productIdx = #{productIdx} order by optionName;
+  </select>
+	
+	<select id="getRecipeList" resultType="com.spring.javaweb10S.vo.RecipeVO">
+    select * from recipe2 <if test='part!="전체"'> where part=#{part}</if> order by idx desc;
+  </select>
+	
+	<select id="getRecipeContent" resultType="com.spring.javaweb10S.vo.RecipeVO">
+    select * from recipe2 where idx = #{idx};
+  </select>
+	
+	
+	
+	
+	
+	<insert id="setProductInput">
+		insert into product2 values (default,#{vo.part},#{vo.productName},#{vo.price},#{vo.discount},#{vo.discountRate},#{vo.thmbnail},#{vo.content},#{vo.ingredient},#{vo.openSw});
+	</insert>
+	
+	<insert id="setOptionInput">
+		insert into option2 values (default,#{vo.productIdx},#{vo.optionName},#{vo.optionPrice});
+	</insert>
+	
+	<insert id="setNewsLetter">
+		insert into todayRecipe2 values (default,#{vo.title},#{vo.article},#{vo.issueDate});
+	</insert>
+	
+	<insert id="setRecipeSave">
+		insert into recipe2 values (default,#{vo.part},#{vo.foodName},#{vo.file},#{vo.star},#{vo.cookTime},#{vo.love},#{vo.openSw},#{vo.item});
+	</insert>
+	
+	
+	
+	
+	<update id="setMemberLevelChange">
+		update member2 set level = #{level} where idx = #{idx};
+	</update>	
+	
+	<delete id="setMemberDelete">
+		delete from member2 where idx = #{idx};
+	</delete>
+	
+	<delete id="setOptionDelete">
+		delete from option2 where idx = #{idx};
+	</delete>
+	
+	<delete id="setProductDelete">
+		delete from product2 as p, option2 as o WHERE p.idx = #{idx} AND o.productIdx = #{productIdx};
+	</delete>
+	
+	
+</mapper>

@@ -1,0 +1,7 @@
+show tables;
+
+create table recipe2 (
+	idx   int not null auto_incerment,  /* 레시피 고유번호 */
+	part  varchar(10) not null,         /* 레시피 분류 */
+);
+

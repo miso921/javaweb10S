@@ -1,0 +1,73 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<% pageContext.setAttribute("newLine", "\n"); %>
+<c:set var="ctp" value="${pageContext.request.contextPath}"/>
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>productList.jsp</title>
+  <link rel="stylesheet" href="${ctp}/font/font.css"/>
+	<jsp:include page="/WEB-INF/views/include/bs4.jsp"/>
+	<style>
+		.container, h4 {font-family:'SUITE-Regular';}
+		a:hover {text-decoration:none;}
+		a {color:black;}
+	</style>
+</head>
+<body>
+<p><br/></p>
+<div class="container">
+  <span>[<a href="${ctp}/product/productList">전체보기</a>]</span>
+  <c:forEach var="part" items="${parts}" varStatus="st">
+  	<span>[<a href="${ctp}/product/productList?part=${part}">${part}</a>]</span>
+	  <%-- <c:if test="${!st.last}"></c:if> --%>
+  </c:forEach>
+  <hr/>
+  <div class="row">
+    <div class="col">
+	    <h4>상품 목록<font color="brown"><b>${part}</b></font></h4>
+    </div>
+  </div>
+  <hr/>
+  <c:set var="cnt" value="0"/>
+  <div class="row mt-4">
+    <c:forEach var="vo" items="${productVOS}">
+      <div class="col-md-4">
+        <div style="text-align:center">
+          <a href="${ctp}/admin/product/productContent?idx=${vo.idx}">
+            <img src="${ctp}/product/${vo.thmbnail}" width="200px" height="180px"/>
+            <div><font size="2" color="black">${vo.productName}</font></div>
+            <c:if test="${vo.discountRate != 0}">
+            	<div>
+            		<del><font size="2" color="orange" class="mr-1"><fmt:formatNumber value="${vo.price}" pattern="#,###"/>원</font></del>
+	            	<font size="2" color="red">${vo.discountRate}%</font>
+            	</div>
+	            <div><font size="2" color="orange"><fmt:formatNumber value="${vo.discount}" pattern="#,###"/>원</font></div>
+            </c:if>
+            <c:if test="${vo.discountRate == 0}">
+            	<div>
+	            	<font size="2" color="orange"><fmt:formatNumber value="${vo.price}" pattern="#,###"/>원</font>
+            	</div>
+            </c:if>
+          </a>
+        </div>
+      </div>
+      <c:set var="cnt" value="${cnt+1}"/>
+      <c:if test="${cnt % 3 == 0}">
+      	</div>
+        <div class="row mt-5">
+      </c:if>
+    </c:forEach>
+    <div class="container">
+      <c:if test="${fn:length(productVOS) == 0}"><h3>제품 준비중입니다.</h3></c:if>
+    </div>
+  </div>
+  <hr/>
+</div>
+<p><br/></p>
+<jsp:include page="/WEB-INF/views/include/footer.jsp"/>
+</body>
+</html>

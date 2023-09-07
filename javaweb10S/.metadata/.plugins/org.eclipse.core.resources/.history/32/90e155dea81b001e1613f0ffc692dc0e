@@ -1,0 +1,15 @@
+package com.spring.javaweb10S.dao;
+
+import java.util.ArrayList;
+
+import org.apache.ibatis.annotations.Param;
+
+import com.spring.javaweb10S.vo.ProductVO;
+
+public interface ShopDAO {
+
+	public ArrayList<ProductVO> getItemPart();
+
+	public ArrayList<ProductVO> getPartItemList(@Param("part") String part);
+
+}

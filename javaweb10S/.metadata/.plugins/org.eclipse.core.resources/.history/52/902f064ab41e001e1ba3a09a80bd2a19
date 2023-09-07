@@ -1,0 +1,99 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<% pageContext.setAttribute("newLine", "\n"); %>
+<c:set var="ctp" value="${pageContext.request.contextPath}"/>
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>productContent.jsp(상품정보 상세보기)</title>
+  <jsp:include page="/WEB-INF/views/include/bs4.jsp"/>
+  <link rel="stylesheet" href="${ctp}/font/font.css"/>
+  <style>
+		.container, h4, h3 {font-family:'SUITE-Regular';}
+	</style>
+</head>
+  <script>
+  	'use strict';
+    
+  	// 천단위마다 콤마를 표시해 주는 함수
+    function numberWithCommas(x) {
+    	return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g,",");
+    }
+  	
+  	// 상품 삭제
+    function productDelete(idx, productIdx) {
+  		let ans = confirm("상품을 삭제하시겠습니까?");
+  		if(!ans) return false;
+  		else {
+	  		$.ajax({
+	  			type : "get",
+	  			url  : "${ctp}/admin/product/productDelete",
+	  			data : {idx : idx, productIdx : productIdx},
+	  			success : function() {
+	  				alert("상품 삭제가 완료되었습니다!");
+	  				location.href="${ctp}/admin/product/productList";
+  				},
+	  			error: function() {
+	  				alert("전송오류!");
+	  			}
+	  		});
+  		}
+  	}	
+  </script>
+</head>
+<body>
+<p><br/></p>
+<div class="container">
+  <div class="row">
+    <div class="col p-3 text-center" style="border:1px solid #ccc">
+		  <!-- 상품메인 이미지 -->
+		  <div>
+		    <img src="${ctp}/product/${productVO.thmbnail}" width="100%"/>
+		  </div>
+		</div>
+		<div class="col p-3 text-right">
+		  <!-- 상품 기본정보 -->
+		  <div id="iteminfor">
+		    <h3>${productVO.productName}</h3>
+		    <c:if test="${empty productVO.discountRate}">
+		    	<h3><font color="orange"><fmt:formatNumber value="${productVO.price}"/>원</font></h3>
+		    </c:if>
+		    <c:if test="${!empty productVO.discountRate}">
+		    	<div>
+		    		<h4><del><font color="gray"><fmt:formatNumber value="${productVO.price}"/>원</font></del></h4>
+		    		<h3><font color="orange"><fmt:formatNumber value="${productVO.discount}"/></font>원</h3>
+		    	</div>
+		    </c:if>
+		  </div>
+		  <!-- 상품주문을 위한 옵션정보 출력 -->
+		  <div class="form-group">
+		    <form name="optionForm" method="post">  <!-- 옵션의 정보를 보여주기위한 form -->
+		      <select size="1" class="form-control" id="selectOption">
+		        <option value="" disabled selected>상품옵션선택</option>
+		        <option value="0:기본품목_${productVO.price}">기본품목</option>
+		        <c:forEach var="optionVO" items="${optionVOS}">
+		          <option value="${optionVO.idx}:${optionVO.optionName}_${optionVO.optionPrice}">${optionVO.optionName}</option>
+				    </c:forEach>
+		      </select>
+		  </div>
+		  <br/>
+		  <div class="text-right p-2">
+		    <input type="button" value="옵션등록" onclick="location.href='${ctp}/admin/product/productOptionInput?productName=${productVO.productName}';" class="btn btn-success"/>
+		    <input type="button" value="상품삭제" onclick="productDelete(${productVO.idx},${optionVO.productIdx})" class="btn btn-danger"/>
+		    <input type="button" value="돌아가기" onclick="location.href='${ctp}/admin/product/productList';" class="btn btn-warning"/>
+		  </div>
+      </form>
+		</div>
+  </div>
+  <br/><br/>
+  <!-- 상품 상세설명 보여주기 -->
+  <div id="content" class="text-center"><br/>
+  	<img src="${ctp}/product/${productVO.content}">	
+  </div>
+</div>
+<p><br/></p>
+</body>
+</html>

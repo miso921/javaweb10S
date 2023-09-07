@@ -1,0 +1,44 @@
+package com.spring.javaweb10S.service;
+
+import java.util.ArrayList;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.spring.javaweb10S.dao.ShopDAO;
+import com.spring.javaweb10S.vo.ItemOrderVO;
+import com.spring.javaweb10S.vo.OptionVO;
+import com.spring.javaweb10S.vo.ProductVO;
+
+@Service
+public class ShopServiceImpl implements ShopService {
+	
+	@Autowired
+	ShopDAO shopDAO;
+
+	@Override
+	public ArrayList<ProductVO> getItemPart() {
+		return shopDAO.getItemPart();
+	}
+
+	@Override
+	public ArrayList<ProductVO> getPartItemList(String part) {
+		return shopDAO.getPartItemList(part);
+	}
+
+	@Override
+	public ProductVO getItemContent(int idx) {
+		return shopDAO.getItemContent(idx);
+	}
+
+	@Override
+	public ArrayList<OptionVO> getItemOption(int productIdx) {
+		return shopDAO.getItemOption(productIdx);
+	}
+
+	@Override
+	public ItemOrderVO getOrderMaxIdx() {
+		return shopDAO.getOrderMaxIdx();
+	}
+
+}
